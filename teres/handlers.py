@@ -93,3 +93,10 @@ class LoggingHandler(teres.Handler):
         head = ":: [   " + res + " " * spaces + "] :: "
 
         return head + record.msg
+
+    def close(self):
+        """
+        LoggingHandler does not need cleanup but it's called by Reporter in
+        destructor.
+        """
+        pass
