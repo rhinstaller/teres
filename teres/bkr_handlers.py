@@ -33,6 +33,7 @@ TASK_LOG_FILE = object()  # boolean
 SUBTASK_RESULT = object()  # optional parameter: path
 SCORE = object()  # mandatory parameter: score
 SUBTASK_LOG_FILE = object()  # optional parameter: result url
+DEFAULT_LOG_DEST = object()  # boolean
 
 logger = logging.getLogger(__name__)
 
@@ -78,9 +79,11 @@ class ThinBkrHandler(teres.Handler):
         # Read beaker environment variables to be able to communicate with lab
         # controller.
         self.recipe_id = recipe_id or os.environ.get("BEAKER_RECIPE_ID")
-        self.lab_controller_url = lab_controller_url or os.environ.get("BEAKER_LAB_CONTROLLER_URL")
+        self.lab_controller_url = lab_controller_url or os.environ.get(
+            "BEAKER_LAB_CONTROLLER_URL")
 
         self.last_result_url = ""
+        self.default_log_dest = self._get_task_url()
 
         # Prepare default test log.
         self.job_log_name = job_log_name
@@ -131,6 +134,10 @@ class ThinBkrHandler(teres.Handler):
         if send_log and has_logfile and to_task:
             return self._get_task_url() + "logs/" + record.logname + "/"
 
+        # Generate url for log file to default destination.
+        if send_log and has_logfile and not (to_task or to_subtask):
+            return self.default_log_dest + "logs/" + record.logname + "/"
+
         # Generate url for a task result log.
         if send_log and has_logfile and to_subtask:
 
@@ -138,7 +145,7 @@ class ThinBkrHandler(teres.Handler):
                 return record.flags[
                     SUBTASK_LOG_FILE] + "logs/" + record.logname + "/"
             else:
-                return self.last_result_url + "/logs/" + record.logname + "/"
+                return self.last_result_url + "logs/" + record.logname + "/"
 
         # Generate url for subtask result.
         if subtask_result:
@@ -182,7 +189,10 @@ class ThinBkrHandler(teres.Handler):
                 logger.warning("Result reporting failed with code: %s",
                                req.status_code)
 
-            self.last_result_url = req.headers["Location"]
+            self.last_result_url = req.headers["Location"] + "/"
+
+            if record.flags.get(DEFAULT_LOG_DEST, False):
+                self.default_log_dest = req.headers["Location"] + "/"
 
     def _emit_file(self, record):
         """
@@ -192,10 +202,12 @@ class ThinBkrHandler(teres.Handler):
             if isinstance(record.logfile, str):
                 record.logname = _path_to_name(record.logfile)
 
-            elif isinstance(record.logfile, file) and record.logfile.name != "<fdopen>":
+            elif isinstance(record.logfile,
+                            file) and record.logfile.name != "<fdopen>":
                 record.logfile = record.logfile.name
             else:
-                logger.warning("Logname parameter is mandatory if logfile is file object.")
+                logger.warning(
+                    "Logname parameter is mandatory if logfile is file object.")
                 return
 
         url = self._generate_url(record)
@@ -212,6 +224,7 @@ class ThinBkrHandler(teres.Handler):
         req = requests.put(url, data=payload)
         if req.status_code != 204:
             logger.warning("Uploading failed with code %s", req.status_code)
+            logger.warning("Destination URL: %s", url)
 
     def close(self):
         flg = {TASK_LOG_FILE: True}

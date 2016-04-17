@@ -122,13 +122,26 @@ during the initialization.
     List of flags:
 
     - `TASK_LOG_FILE` This is a boolean flag indicating that provided log file
-      should be sent to the task. :meth:`teres.Reporter.send_file()`
-    - `SUBTASK_LOG_FILE` This flag accepts optional value of result url to send
-      file to specific subtask result. :meth:`teres.Reporter.send_file()`
+      should be sent to the task. :py:meth:`teres.Reporter.send_file()`
     - `SUBTASK_RESULT` This flag is used to create new subtask result in beaker
-      web ui. It is accepted by log methods. :class:`teres.Reporter`
+      web ui. It is accepted by log methods. :py:class:`teres.Reporter`
     - `SCORE` This is used by logging functions to set score while creating
-      subtask result. Integer value is mandatory. :class:`teres.Reporter`
+      subtask result. Integer value is mandatory. :py:class:`teres.Reporter`
+    - `SUBTASK_LOG_FILE` This flag accepts optional value of result url to send
+      file to specific subtask result. :py:meth:`teres.Reporter.send_file()`
+    - `DEFAULT_LOG_DEST` This boolean flag indicates that all following log
+      files should be stored to this subtask by default. This can be overridden
+      by `TASK_LOG_FILE` and `SUBTASK_LOG_FILE` flags and the default
+      destination can be changed by using this flag again.
+      :py:class:`teres.Reporter`
+
+.. py:method:: _emit_file(record)
+
+    This method is called from :py:class:`teres.Reporter`. Through the record
+    parameter it accepts flags that can modify the destination of the log file
+    sent to Beaker. Without any flags the file is attached to the task result.
+    This default path can be changed to any subtask result by using
+    `DEFAULT_LOG_DEST` flag.
 
 .. _Beaker: https://beaker-project.org/
 .. _harness: https://beaker-project.org/docs/alternative-harnesses/
