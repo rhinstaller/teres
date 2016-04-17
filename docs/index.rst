@@ -121,15 +121,15 @@ during the initialization.
 
     List of flags:
 
-    - `TASK_LOG_FILE` This is a boolean flag indicating that provided log file
+    - `TASK_LOG_FILE` - This is a boolean flag indicating that provided log file
       should be sent to the task. :py:meth:`teres.Reporter.send_file()`
-    - `SUBTASK_RESULT` This flag is used to create new subtask result in beaker
+    - `SUBTASK_RESULT` -  This flag is used to create new subtask result in beaker
       web ui. It is accepted by log methods. :py:class:`teres.Reporter`
-    - `SCORE` This is used by logging functions to set score while creating
+    - `SCORE` - This is used by logging functions to set score while creating
       subtask result. Integer value is mandatory. :py:class:`teres.Reporter`
-    - `SUBTASK_LOG_FILE` This flag accepts optional value of result url to send
+    - `SUBTASK_LOG_FILE` -  This flag accepts optional value of result url to send
       file to specific subtask result. :py:meth:`teres.Reporter.send_file()`
-    - `DEFAULT_LOG_DEST` This boolean flag indicates that all following log
+    - `DEFAULT_LOG_DEST` - This boolean flag indicates that all following log
       files should be stored to this subtask by default. This can be overridden
       by `TASK_LOG_FILE` and `SUBTASK_LOG_FILE` flags and the default
       destination can be changed by using this flag again.
