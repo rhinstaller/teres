@@ -123,7 +123,7 @@ during the initialization.
 
     - `TASK_LOG_FILE` This is a boolean flag indicating that provided log file
       should be sent to the task. :meth:`teres.Reporter.send_file()`
-    - `RESULT_LOG_FILE` This flag accepts optional value of result url to send
+    - `SUBTASK_LOG_FILE` This flag accepts optional value of result url to send
       file to specific subtask result. :meth:`teres.Reporter.send_file()`
     - `SUBTASK_RESULT` This flag is used to create new subtask result in beaker
       web ui. It is accepted by log methods. :class:`teres.Reporter`

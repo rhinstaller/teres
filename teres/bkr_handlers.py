@@ -30,9 +30,9 @@ import teres
 
 # Flags defintion
 TASK_LOG_FILE = object()  # boolean
-RESULT_LOG_FILE = object()  # optional parameter: result url
 SUBTASK_RESULT = object()  # optional parameter: path
 SCORE = object()  # mandatory parameter: score
+SUBTASK_LOG_FILE = object()  # optional parameter: result url
 
 logger = logging.getLogger(__name__)
 
@@ -119,24 +119,29 @@ class ThinBkrHandler(teres.Handler):
         Method to generate beaker url.
         """
 
+        # Make following conditions more readable by creating following
+        # variables.
+        send_log = record.result == teres.FILE
+        has_logfile = record.logfile is not None
+        to_task = record.flags.get(TASK_LOG_FILE, False)
+        to_subtask = record.flags.get(SUBTASK_LOG_FILE, False)
+        subtask_result = record.flags.get(SUBTASK_RESULT, False)
+
         # Generate url for a task log.
-        if (record.result == teres.FILE) and (
-                record.logfile is not None) and record.flags.get(TASK_LOG_FILE,
-                                                                 False):
+        if send_log and has_logfile and to_task:
             return self._get_task_url() + "logs/" + record.logname + "/"
 
         # Generate url for a task result log.
-        if (record.result == teres.FILE) and (
-                record.logfile is not None) and record.flags.get(
-                    RESULT_LOG_FILE, False):
+        if send_log and has_logfile and to_subtask:
 
-            if isinstance(record.flags[RESULT_LOG_FILE], str):
-                return record.flags[RESULT_LOG_FILE] + "logs/" + record.logname
+            if isinstance(record.flags[SUBTASK_LOG_FILE], str):
+                return record.flags[
+                    SUBTASK_LOG_FILE] + "logs/" + record.logname + "/"
             else:
-                return self.last_result_url + "/logs/" + record.logname
+                return self.last_result_url + "/logs/" + record.logname + "/"
 
         # Generate url for subtask result.
-        if SUBTASK_RESULT in record.flags.keys():
+        if subtask_result:
             return self._get_task_url() + "results/"
 
     def _format_msg(self, record):
