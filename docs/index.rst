@@ -143,7 +143,7 @@ during the initialization.
     This default path can be changed to any subtask result by using
     `DEFAULT_LOG_DEST` flag.
 
-.. py:method::reset_log_dest()
+.. py:method:: reset_log_dest()
 
     This method resets default log destination to task result instead of
     particular subtask result.
