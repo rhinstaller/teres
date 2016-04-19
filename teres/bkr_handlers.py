@@ -226,13 +226,18 @@ class ThinBkrHandler(teres.Handler):
             logger.warning("Uploading failed with code %s", req.status_code)
             logger.warning("Destination URL: %s", url)
 
+    def reset_log_dest(self):
+        """
+        Reset default log destination to task result instead of particular
+        subtask result.
+        """
+        self.default_log_dest = self._get_task_url()
+
     def close(self):
-        flg = {TASK_LOG_FILE: True}
         record = teres.ReportRecord(teres.FILE,
                                     None,
                                     logfile=self.job_log,
-                                    logname=self.job_log_name,
-                                    flags=flg)
+                                    logname=self.job_log_name)
         self._emit_file(record)
 
         self.job_log.close()
