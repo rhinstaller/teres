@@ -15,8 +15,9 @@
    :maxdepth: 2
 
 Teres is a library for reporting results from tests written in python. So far it
-provides two handler classes `LoggingHandler` and `ThinBkrHandler` for reporting
-to *stdout* and to Beaker_ lab controller.
+provides two handler classes :py:class:`teres.handlers.LoggingHandler` and
+:py:class:`teres.bkr_handlers.ThinBkrHandler` for reporting to *stdout* and to
+beaker_ lab controller.
 
 
 The API
@@ -99,8 +100,8 @@ during the initialization.
 
 .. py:class:: ThinBkrHandler([result=teres.INFO[, task_log_name="testout.log"[, task_log_dir="/tmp/"[, recipe_id=None [, lab_controller_url=None]]]]])
 
-    This handler class supports reporting to the Beaker_ lab controller using its
-    API. This includes converting teres result levels to those of a Beaker,
+    This handler class supports reporting to the beaker_ lab controller using its
+    API. This includes converting teres result levels to those of a beaker,
     reporting the results, uploading log files.
 
     List of parameters:
@@ -108,11 +109,11 @@ during the initialization.
     :param result: Default report level.
     :param str task_log_name: The name of the log file to store all test results.
     :param str task_log_dir: Log directory.
-    :param str recipe_id: ID of a recipe running in Beaker.
-    :param str lab_controller_url: URL for communitcating with Beaker.
+    :param str recipe_id: ID of a recipe running in beaker.
+    :param str lab_controller_url: URL for communitcating with beaker.
 
     If `recipe_id` and `lab_controller_url` aren't provided constructor tries to
-    get the values from environment variables as it is defined in Beaker_ API
+    get the values from environment variables as it is defined in beaker_ API
     for alternative harness_.
 
     To allow user to modify results in beaker web interface one have to use
@@ -139,7 +140,7 @@ during the initialization.
 
     This method is called from :py:class:`teres.Reporter`. Through the record
     parameter it accepts flags that can modify the destination of the log file
-    sent to Beaker. Without any flags the file is attached to the task result.
+    sent to beaker. Without any flags the file is attached to the task result.
     This default path can be changed to any subtask result by using
     `DEFAULT_LOG_DEST` flag.
 
@@ -148,7 +149,7 @@ during the initialization.
     This method resets default log destination to task result instead of
     particular subtask result.
 
-.. _Beaker: https://beaker-project.org/
+.. _beaker: https://beaker-project.org/
 .. _harness: https://beaker-project.org/docs/alternative-harnesses/
 
 .. Indices and tables
