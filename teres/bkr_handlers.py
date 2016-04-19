@@ -70,8 +70,8 @@ class ThinBkrHandler(teres.Handler):
 
     def __init__(self,
                  result=teres.INFO,
-                 job_log_name="testout.log",
-                 job_log_dir="/tmp/",
+                 task_log_name="testout.log",
+                 task_log_dir="/tmp/",
                  recipe_id=None,
                  lab_controller_url=None):
         super(ThinBkrHandler, self).__init__(result)
@@ -86,12 +86,12 @@ class ThinBkrHandler(teres.Handler):
         self.default_log_dest = self._get_task_url()
 
         # Prepare default test log.
-        self.job_log_name = job_log_name
-        self.job_log_dir = job_log_dir
+        self.task_log_name = task_log_name
+        self.task_log_dir = task_log_dir
 
-        job_log_prefix = job_log_name + "."
-        self.job_log = tempfile.TemporaryFile(prefix=job_log_prefix,
-                                              dir=self.job_log_dir)
+        task_log_prefix = task_log_name + "."
+        self.task_log = tempfile.TemporaryFile(prefix=task_log_prefix,
+                                               dir=self.task_log_dir)
 
     def _get_recipe(self):
         """
@@ -166,7 +166,7 @@ class ThinBkrHandler(teres.Handler):
         """Record a result to beaker and return an url with a result id."""
 
         # Without any flags specified just write the message into the log file.
-        self.job_log.write(self._format_msg(record))
+        self.task_log.write(self._format_msg(record))
 
         subtask_result = record.flags.get(SUBTASK_RESULT, False)
         if subtask_result:
@@ -236,8 +236,8 @@ class ThinBkrHandler(teres.Handler):
     def close(self):
         record = teres.ReportRecord(teres.FILE,
                                     None,
-                                    logfile=self.job_log,
-                                    logname=self.job_log_name)
+                                    logfile=self.task_log,
+                                    logname=self.task_log_name)
         self._emit_file(record)
 
-        self.job_log.close()
+        self.task_log.close()

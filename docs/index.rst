@@ -97,7 +97,7 @@ during the initialization.
 
 .. py:module:: teres.bkr_handlers
 
-.. py:class:: ThinBkrHandler([result=teres.INFO[, job_log_name="testout.log"[, job_log_dir="/tmp/"[, recipe_id=None [, lab_controller_url=None]]]]])
+.. py:class:: ThinBkrHandler([result=teres.INFO[, task_log_name="testout.log"[, task_log_dir="/tmp/"[, recipe_id=None [, lab_controller_url=None]]]]])
 
     This handler class supports reporting to the Beaker_ lab controller using its
     API. This includes converting teres result levels to those of a Beaker,
@@ -106,8 +106,8 @@ during the initialization.
     List of parameters:
 
     :param result: Default report level.
-    :param str job_log_name: The name of the log file to store all test results.
-    :param str job_log_dir: Log directory.
+    :param str task_log_name: The name of the log file to store all test results.
+    :param str task_log_dir: Log directory.
     :param str recipe_id: ID of a recipe running in Beaker.
     :param str lab_controller_url: URL for communitcating with Beaker.
 
