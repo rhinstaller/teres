@@ -63,7 +63,7 @@ class LoggingHandler(teres.Handler):
         self.logdir = tempfile.mkdtemp(prefix=self.name, dir=self.dest)
 
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(_result_to_level(self.result))
+        self.logger.setLevel(_result_to_level(self.result_level))
 
         if not isinstance(handlers, collections.Iterable):
             handlers = [handlers]
