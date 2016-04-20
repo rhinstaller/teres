@@ -55,6 +55,18 @@ def _result_to_bkr(result):
     return mapping[result]
 
 
+def _format_msg(record):
+    """
+    Method that takes care of formatting a message.
+    """
+    res = teres.result_to_name(record.result)
+    spaces = 10 - 3 - len(res)
+
+    head = ":: [   " + res + " " * spaces + "] :: "
+
+    return head + record.msg + "\n"
+
+
 def _path_to_name(path):
     """
     Simple function to get nice log name.
@@ -155,22 +167,11 @@ class ThinBkrHandler(teres.Handler):
         if subtask_result:
             return self._get_task_url() + "results/"
 
-    def _format_msg(self, record):
-        """
-        Method that takes care of formatting a message.
-        """
-        res = teres.result_to_name(record.result)
-        spaces = 10 - 3 - len(res)
-
-        head = ":: [   " + res + " " * spaces + "] :: "
-
-        return head + record.msg + "\n"
-
     def _emit_log(self, record):
         """Record a result to beaker and return an url with a result id."""
 
         # Without any flags specified just write the message into the log file.
-        self.task_log.write(self._format_msg(record))
+        self.task_log.write(_format_msg(record))
 
         subtask_result = record.flags.get(SUBTASK_RESULT, False)
         if subtask_result and not self.disable_subtasks:
