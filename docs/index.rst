@@ -86,13 +86,13 @@ actual reporting.
     :param result: Set result level. Messages with lower level will be ignored.
     :param bool process_logs: Setting this to `False` log processing can be completely disabled.
 
-    .. py:method:: set_result_level(result)
+    .. py:attribute:: result
 
-        Result level setter.
+        This attribute contains the default result level.
 
-    .. py:method:: get_result_level()
+    .. py:attribute:: process_logs
 
-        Result level getter.
+        Boolean value that indicates if log files should be processed.
 
     .. py:method:: emit(record)
 
@@ -110,18 +110,6 @@ actual reporting.
     .. py:method:: close()
 
         Flush all pending files and messages. Clean up.
-
-    .. py:method:: process_logs_on
-
-        Turn on log file processing.
-
-    .. py:method:: process_logs_off
-
-        Turn off log file processing.
-
-    .. py:method:: process_logs_toggle
-
-        Toggle log file processing.
 
 :mod:`handlers`
 ---------------

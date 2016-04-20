@@ -195,20 +195,36 @@ class Handler(object):
 
     def __init__(self, result=INFO, process_logs=True):
         super(Handler, self).__init__()
-        self.result = result
-        self.process_logs = process_logs
+        self._result = result
+        self._process_logs = process_logs
 
-    def set_result_level(self, result):
-        """
-        Result level setter.
-        """
-        self.result = result
-
-    def get_result_level(self):
+    @property
+    def result(self):
         """
         Result level getter.
         """
-        return self.result
+        return self._result
+
+    @result.setter
+    def result(self, result):
+        """
+        Result level setter.
+        """
+        self._result = result
+
+    @property
+    def process_logs(self):
+        """
+        Getter for process_logs.
+        """
+        return self.process_logs
+
+    @process_logs.setter
+    def process_logs(self, value):
+        """
+        Set process_logs.
+        """
+        self._process_logs = value
 
     def emit(self, record):
         """
@@ -216,7 +232,7 @@ class Handler(object):
         routine.
         """
         # Check defalult level and other tocnditions.
-        if (record.result < self.result) and not self.process_logs:
+        if (record.result < self._result) and not self._process_logs:
             return
 
         if (record.result == FILE) and (record.logfile is not None):
@@ -244,21 +260,3 @@ class Handler(object):
         This method should flush all outstanding results and logs.
         """
         raise NotImplementedError
-
-    def process_logs_on(self):
-        """
-        Start processing log files.
-        """
-        self.process_logs = True
-
-    def process_logs_off(self):
-        """
-        Stop processing log files.
-        """
-        self.process_logs = False
-
-    def process_logs_toggle(self):
-        """
-        Toggle log processing.
-        """
-        self.process_logs = not self.process_logs
