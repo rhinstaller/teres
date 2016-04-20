@@ -70,12 +70,13 @@ class ThinBkrHandler(teres.Handler):
     """
 
     def __init__(self,
-                 result=teres.INFO,
+                 result_level=teres.INFO,
+                 process_logs=True,
                  task_log_name="testout.log",
                  task_log_dir="/tmp/",
                  recipe_id=None,
                  lab_controller_url=None):
-        super(ThinBkrHandler, self).__init__(result)
+        super(ThinBkrHandler, self).__init__(result_level, process_logs)
 
         # Read beaker environment variables to be able to communicate with lab
         # controller.

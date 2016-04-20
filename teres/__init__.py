@@ -193,31 +193,31 @@ class Handler(object):
     Class defining the Handler API.
     """
 
-    def __init__(self, result=INFO, process_logs=True):
+    def __init__(self, result_level=INFO, process_logs=True):
         super(Handler, self).__init__()
-        self._result = result
+        self._result_level = result_level
         self._process_logs = process_logs
 
     @property
-    def result(self):
+    def result_level(self):
         """
         Result level getter.
         """
-        return self._result
+        return self._result_level
 
-    @result.setter
-    def result(self, result):
+    @result_level.setter
+    def result_level(self, result_level):
         """
         Result level setter.
         """
-        self._result = result
+        self._result_level = result_level
 
     @property
     def process_logs(self):
         """
         Getter for process_logs.
         """
-        return self.process_logs
+        return self._process_logs
 
     @process_logs.setter
     def process_logs(self, value):
@@ -231,8 +231,11 @@ class Handler(object):
         Decides if we are reporting a result or a file and executes the correct
         routine.
         """
-        # Check defalult level and other tocnditions.
-        if (record.result < self._result) and not self._process_logs:
+        # Check default level and other tocnditions.
+        if record.result < self.result_level:
+            return
+
+        if (record.result == FILE) and not self.process_logs:
             return
 
         if (record.result == FILE) and (record.logfile is not None):

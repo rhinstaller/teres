@@ -50,8 +50,13 @@ class LoggingHandler(teres.Handler):
     A handler class which writes the test results to a file.
     """
 
-    def __init__(self, name, handlers, result=teres.INFO, dest="/tmp/"):
-        super(LoggingHandler, self).__init__(result)
+    def __init__(self,
+                 name,
+                 handlers,
+                 result_level=teres.INFO,
+                 process_logs=True,
+                 dest="/tmp/"):
+        super(LoggingHandler, self).__init__(result_level, process_logs)
 
         self.name = name
         self.dest = dest
