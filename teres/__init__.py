@@ -24,11 +24,11 @@ module.
 
 # These are default test results and their values. This should be reset to 0
 # after particular test is finished.
+FILE = 99
 ERROR = 50
 FAIL = 40
 PASS = 30
 INFO = 20
-FILE = INFO
 DEBUG = 10
 NONE = 0
 
@@ -193,15 +193,32 @@ class Handler(object):
     Class defining the Handler API.
     """
 
-    def __init__(self, result=INFO):
+    def __init__(self, result=INFO, process_logs=True):
         super(Handler, self).__init__()
         self.result = result
+        self.process_logs = process_logs
+
+    def set_result_level(self, result):
+        """
+        Result level setter.
+        """
+        self.result = result
+
+    def get_result_level(self):
+        """
+        Result level getter.
+        """
+        return self.result
 
     def emit(self, record):
         """
         Decides if we are reporting a result or a file and executes the correct
         routine.
         """
+        # Check defalult level and other tocnditions.
+        if (record.result < self.result) and not self.process_logs:
+            return
+
         if (record.result == FILE) and (record.logfile is not None):
             return self._emit_file(record)
 
@@ -227,3 +244,21 @@ class Handler(object):
         This method should flush all outstanding results and logs.
         """
         raise NotImplementedError
+
+    def process_logs_on(self):
+        """
+        Start processing log files.
+        """
+        self.process_logs = True
+
+    def process_logs_off(self):
+        """
+        Stop processing log files.
+        """
+        self.process_logs = False
+
+    def process_logs_toggle(self):
+        """
+        Toggle log processing.
+        """
+        self.process_logs = not self.process_logs

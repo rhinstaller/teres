@@ -33,10 +33,10 @@ def _result_to_level(result):
     Translate reporter result to logging level.
     """
     mapping = {
+        teres.FILE: logging.INFO,
         teres.ERROR: logging.CRITICAL,
         teres.FAIL: logging.ERROR,
         teres.PASS: logging.INFO,
-        # teres.FILE is the same as INFO
         teres.INFO: logging.INFO,
         teres.DEBUG: logging.DEBUG,
         teres.NONE: logging.NOTSET,

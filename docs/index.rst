@@ -78,6 +78,51 @@ actual reporting.
 
         Flush results from all handlers and clean up.
 
+.. py:class:: Handler([result=INFO[, process_logs=True]])
+
+    The :py:class:`Handler` is an abstract class for implementing handlers used
+    by :py:class:`Reporter`.
+
+    :param result: Set result level. Messages with lower level will be ignored.
+    :param bool process_logs: Setting this to `False` log processing can be completely disabled.
+
+    .. py:method:: set_result_level(result)
+
+        Result level setter.
+
+    .. py:method:: get_result_level()
+
+        Result level getter.
+
+    .. py:method:: emit(record)
+
+        Decides whether we are reporting a result or a file and executes the
+        correct routine to process the `record`.
+
+    .. py:method:: _emit_log(record)
+
+        Take care of logging a message.
+
+    .. py:method:: _emit_file(record)
+
+        Take care of processing a log file.
+
+    .. py:method:: close()
+
+        Flush all pending files and messages. Clean up.
+
+    .. py:method:: process_logs_on
+
+        Turn on log file processing.
+
+    .. py:method:: process_logs_off
+
+        Turn off log file processing.
+
+    .. py:method:: process_logs_toggle
+
+        Toggle log file processing.
+
 :mod:`handlers`
 ---------------
 

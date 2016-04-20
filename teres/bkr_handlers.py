@@ -43,6 +43,7 @@ def _result_to_bkr(result):
     This function translates teres results to beaker results.
     """
     mapping = {
+        teres.FILE: "None",
         teres.ERROR: "Warn",
         teres.FAIL: "Fail",
         teres.PASS: "Pass",
