@@ -85,8 +85,8 @@ class ThinBkrHandler(teres.Handler):
         self.lab_controller_url = lab_controller_url or os.environ.get(
             "BEAKER_LAB_CONTROLLER_URL")
 
-        self.last_result_url = ""
         self.default_log_dest = self._get_task_url()
+        self.last_result_url = self.default_log_dest
         self.disable_subtasks = disable_subtasks
 
         # Prepare default test log.
@@ -145,7 +145,7 @@ class ThinBkrHandler(teres.Handler):
         # Generate url for a task result log.
         if send_log and has_logfile and to_subtask:
 
-            if isinstance(record.flags[SUBTASK_LOG_FILE], str):
+            if isinstance(to_subtask, str):
                 return record.flags[
                     SUBTASK_LOG_FILE] + "logs/" + record.logname + "/"
             else:
@@ -173,7 +173,7 @@ class ThinBkrHandler(teres.Handler):
         self.task_log.write(self._format_msg(record))
 
         subtask_result = record.flags.get(SUBTASK_RESULT, False)
-        if subtask_result and self.disable_subtasks:
+        if subtask_result and not self.disable_subtasks:
             url = self._generate_url(record)
 
             data = {
