@@ -75,7 +75,8 @@ class ThinBkrHandler(teres.Handler):
                  task_log_name="testout.log",
                  task_log_dir="/tmp/",
                  recipe_id=None,
-                 lab_controller_url=None):
+                 lab_controller_url=None,
+                 disable_subtasks=False):
         super(ThinBkrHandler, self).__init__(result_level, process_logs)
 
         # Read beaker environment variables to be able to communicate with lab
@@ -86,6 +87,7 @@ class ThinBkrHandler(teres.Handler):
 
         self.last_result_url = ""
         self.default_log_dest = self._get_task_url()
+        self.disable_subtasks = disable_subtasks
 
         # Prepare default test log.
         self.task_log_name = task_log_name
@@ -171,7 +173,7 @@ class ThinBkrHandler(teres.Handler):
         self.task_log.write(self._format_msg(record))
 
         subtask_result = record.flags.get(SUBTASK_RESULT, False)
-        if subtask_result:
+        if subtask_result and self.disable_subtasks:
             url = self._generate_url(record)
 
             data = {
