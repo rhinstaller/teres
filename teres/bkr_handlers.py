@@ -231,6 +231,9 @@ class ThinBkrHandler(teres.Handler):
         """
         Pass file records to the record_queue.
         """
+        if isinstance(record.logfile, str):
+            record.logfile = open(record.logfile, 'rb')
+
         self.record_queue.put((_FILE, record))
 
     def _thread_emit_file(self, record):
@@ -251,14 +254,10 @@ class ThinBkrHandler(teres.Handler):
 
         url = self._generate_url(record)
 
-        if isinstance(record.logfile, str):
-            with open(record.logfile, 'rb') as log:
-                payload = log.read()
-        else:
-            position = record.logfile.tell()
-            record.logfile.seek(0)
-            payload = record.logfile.read()
-            record.logfile.seek(position)
+        position = record.logfile.tell()
+        record.logfile.seek(0)
+        payload = record.logfile.read()
+        record.logfile.seek(position)
 
         req = requests.put(url, data=payload)
         if req.status_code != 204:
@@ -272,7 +271,7 @@ class ThinBkrHandler(teres.Handler):
         """
         self.default_log_dest = self._get_task_url()
 
-    def flush(self):
+    def _thread_flush(self):
         """
         Send current state of the task log file to beaker whenever this is
         called. This is meant to enable continuous updating of the task log.
@@ -282,7 +281,7 @@ class ThinBkrHandler(teres.Handler):
                                     logfile=self.task_log,
                                     logname=self.task_log_name)
 
-        self._emit_file(record)
+        self._thread_emit_file(record)
 
     def close(self):
         """
@@ -301,11 +300,11 @@ class ThinBkrHandler(teres.Handler):
         called.
         """
         synced = True
-        last_update = time.clock()
+        last_update = time.time()
 
         while not (self.finished and self.record_queue.empty()):
             try:
-                record_type, record = self.record_queue.get(timeout=1)
+                record_type, record = self.record_queue.get(timeout=0.1)
 
                 if record_type == _LOG:
                     self._thread_emit_log(record)
@@ -316,10 +315,10 @@ class ThinBkrHandler(teres.Handler):
             except Queue.Empty:
                 pass
 
-            if synced and (time.clock() - last_update > self.flush_delay):
-                self.flush()
+            if not synced and (time.time() - last_update > self.flush_delay):
+                self._thread_flush()
                 synced = True
-                last_update = time.clock()
+                last_update = time.time()
 
         if not synced:
-            self.flush()
+            self._thread_flush()
