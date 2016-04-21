@@ -131,25 +131,27 @@ during the initialization.
 
 .. py:module:: teres.bkr_handlers
 
-.. py:class:: ThinBkrHandler([result=teres.INFO[, task_log_name="testout.log"[, task_log_dir="/tmp/"[, recipe_id=None [, lab_controller_url=None]]]]])
+.. py:class:: ThinBkrHandler([result=teres.INFO[, task_log_name="testout.log"[, task_log_dir="/tmp/"[, recipe_id=None [, lab_controller_url=None[, disable_subtasks=False[, flush_delay=15]]]]]]])
 
     This handler class supports reporting to the beaker_ lab controller using its
     API. This includes converting teres result levels to those of a beaker,
-    reporting the results, uploading log files.
+    reporting the results, uploading log files. :py:meth:
 
     List of parameters:
 
-    :param result: Default report level.
+    :param result_level: Default report level.
     :param str task_log_name: The name of the log file to store all test results.
     :param str task_log_dir: Log directory.
     :param str recipe_id: ID of a recipe running in beaker.
     :param str lab_controller_url: URL for communitcating with beaker.
+    :param bool disable_subtasks: This parameter can completely disable creation of subtasks in beaker.
+    :param int flush_delay: Delay between flushing the task log.
 
     If `recipe_id` and `lab_controller_url` aren't provided constructor tries to
     get the values from environment variables as it is defined in beaker_ API
     for alternative harness_.
 
-    To allow user to modify results in beaker web interface one have to use
+    To allow the user to modify results in beaker web interface one have to use
     `flags`. Flags are passed as a `dict` with keys as flags defined in the
     module and values `True`, `False`, `None` or a value specific for the flag.
 
@@ -171,11 +173,31 @@ during the initialization.
 
 .. py:method:: _emit_file(record)
 
-    This method is called from :py:class:`teres.Reporter`. Through the record
-    parameter it accepts flags that can modify the destination of the log file
-    sent to beaker. Without any flags the file is attached to the task result.
-    This default path can be changed to any subtask result by using
-    `DEFAULT_LOG_DEST` flag.
+    This method is called from :py:class:`teres.Reporter` and stores the record
+    and its type in the queue. :py:meth:`teres.bkr_handlers._thread_loop`
+    continuously reads from this queue and calls
+    :py:meth:`teres.bkr_handlers._thread_emit_file` or
+    :py:meth:`teres.bkr_handlers._thread_emit_log` depending on the record type.
+
+.. py:method:: _emit_log(record)
+
+    This method is called from :py:class:`teres.Reporter` and stores the record
+    and its type in the queue. :py:meth:`teres.bkr_handlers._thread_loop`
+    continuously reads from this queue and calls
+    :py:meth:`teres.bkr_handlers._thread_emit_file` or
+    :py:meth:`teres.bkr_handlers._thread_emit_log` depending on the record type.
+
+.. py:method:: _thread_emit_file(record)
+
+    Through the record parameter it accepts flags that can modify the
+    destination of the log file sent to beaker. Without any flags the file is
+    attached to the task result. This default path can be changed to any subtask
+    result by using `DEFAULT_LOG_DEST` flag.
+
+.. py:method:: _thread_emit_log(record)
+
+    The message passed to this method is simply stored in the task log file
+    which is periodically synced with beaker. 
 
 .. py:method:: reset_log_dest()
 
