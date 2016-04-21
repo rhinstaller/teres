@@ -76,7 +76,7 @@ def _path_to_name(path):
 
 class ThinBkrHandlerError(teres.HandlerError):
     """
-
+    Exception for beaker handler module.
     """
     pass
 
