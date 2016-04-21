@@ -74,11 +74,18 @@ def _path_to_name(path):
     return os.path.basename(path).replace(' ', '_')
 
 
+class ThinBkrHandlerError(teres.HandlerError):
+    """
+
+    """
+    pass
+
+
 class ThinBkrHandler(teres.Handler):
     """
     Simple handler for reporting results to beaker within one task. I should be
     capable only of reporting results such as PASS/FAIL/ERROR and upload log
-    files.
+    files. Both recipe_id and lab_controller_url are mandatory.
     """
 
     def __init__(self,
@@ -96,6 +103,10 @@ class ThinBkrHandler(teres.Handler):
         self.recipe_id = recipe_id or os.environ.get("BEAKER_RECIPE_ID")
         self.lab_controller_url = lab_controller_url or os.environ.get(
             "BEAKER_LAB_CONTROLLER_URL")
+
+        if self.recipe_id is None or self.lab_controller_url is None:
+            raise ThinBkrHandlerError(
+                "Both recipe_id and lab_controller_url are mandatory.")
 
         self.default_log_dest = self._get_task_url()
         self.last_result_url = self.default_log_dest

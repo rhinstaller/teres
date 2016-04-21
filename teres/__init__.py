@@ -50,6 +50,13 @@ def result_to_name(result):
     return mapping[result]
 
 
+class HandlerError(Exception):
+    """
+    Generic exception for handlers.
+    """
+    pass
+
+
 class ReportRecord(object):
     """
     ReportRecord instance represents and evet being logged.
