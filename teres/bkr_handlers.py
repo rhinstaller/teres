@@ -311,7 +311,7 @@ class ThinBkrHandler(teres.Handler):
         communication. Although it has to wait for the join when self.close() is
         called.
         """
-        flushed = True
+        synced = True
         last_update = time.clock()
 
         while not (self.finished and self.record_queue.empty()):
@@ -320,17 +320,17 @@ class ThinBkrHandler(teres.Handler):
 
                 if record_type == _LOG:
                     self._thread_emit_log(record)
-                    flushed = False
+                    synced = False
                 elif record_type == _FILE:
                     self._thread_emit_file(record)
 
             except Queue.Empty:
                 pass
 
-            if flushed and (time.clock() - last_update > self.flush_delay):
+            if synced and (time.clock() - last_update > self.flush_delay):
                 self.flush()
-                flushed = True
+                synced = True
                 last_update = time.clock()
 
-        if not flushed:
+        if not synced:
             self.flush()
