@@ -138,6 +138,7 @@ class ThinBkrHandler(teres.Handler):
         self.finished = False
         self.flush_delay = flush_delay
         self.async_thread = threading.Thread(target=self._thread_loop)
+        self.async_thread.daemon = True
         self.async_thread.start()
 
     def _get_recipe(self):
