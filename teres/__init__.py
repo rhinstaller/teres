@@ -24,6 +24,8 @@ module.
 
 # These are default test results and their values. This should be reset to 0
 # after particular test is finished.
+import atexit
+
 FILE = 99
 ERROR = 50
 FAIL = 40
@@ -48,6 +50,14 @@ def result_to_name(result):
     }
 
     return mapping[result]
+
+
+@atexit.register
+def cleanup():
+    """
+    Cleanup method.
+    """
+    Reporter.get_reporter().test_end()
 
 
 class HandlerError(Exception):
