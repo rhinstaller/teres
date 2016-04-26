@@ -19,6 +19,14 @@ provides two handler classes :py:class:`teres.handlers.LoggingHandler` and
 :py:class:`teres.bkr_handlers.ThinBkrHandler` for reporting to *stdout* and to
 beaker_ lab controller.
 
+Constraints
+-----------
+
+If using `teres` module in code together with `os.fork`, the `teres` module
+must be used in the same process where it's imported first (main process).
+This is caused by `cleanup` which is called at the end of python process and
+ensures, that all logs are correctly reported. The `cleanup` however ends
+tests only in the main process, enabling usage of `os.fork`.
 
 The API
 -------
