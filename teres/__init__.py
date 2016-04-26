@@ -22,9 +22,11 @@ handlers. In it's core it's highly inspired byt implementation fo python logging
 module.
 """
 
+import os
+import atexit
+
 # These are default test results and their values. This should be reset to 0
 # after particular test is finished.
-import atexit
 
 FILE = 99
 ERROR = 50
@@ -34,6 +36,8 @@ INFO = 20
 DEBUG = 10
 NONE = 0
 
+# used in cleanup function
+_PID = os.getpid()
 
 def result_to_name(result):
     """
@@ -57,6 +61,10 @@ def cleanup():
     """
     Cleanup method.
     """
+    # when somebody uses fork() and the process ends, don't do anything,
+    # since this is handled by parent process
+    if _PID != os.getpid():
+        return
     Reporter.get_reporter().test_end()
 
 
