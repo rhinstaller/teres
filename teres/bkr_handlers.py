@@ -315,6 +315,7 @@ class ThinBkrHandler(teres.Handler):
         called.
         """
         synced = True
+        first_flush = True
         last_update = time.time()
 
         while not (self.finished and self.record_queue.empty()):
@@ -330,10 +331,12 @@ class ThinBkrHandler(teres.Handler):
             except Queue.Empty:
                 pass
 
-            if not synced and (time.time() - last_update > self.flush_delay):
+            if first_flush or (not synced and (time.time() - last_update > self.flush_delay)):
                 self._thread_flush()
                 synced = True
+                first_flush = False
                 last_update = time.time()
 
+        # Last flush after close() was called.
         if not synced:
             self._thread_flush()
