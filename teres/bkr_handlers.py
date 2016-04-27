@@ -246,27 +246,38 @@ class ThinBkrHandler(teres.Handler):
         """
         Pass file records to the record_queue.
         """
-        if isinstance(record.logfile, str):
-            record.logfile = open(record.logfile, 'rb')
-
-        self.record_queue.put((_FILE, record))
-
-    def _thread_emit_file(self, record):
-        """
-        Send file record to beaker.
-        """
         if record.logname is None:
             if isinstance(record.logfile, str):
                 record.logname = _path_to_name(record.logfile)
 
+                msg = 'Sending file "{}" as "{}".'.format(record.logfile,
+                                                          record.logname)
+
             elif isinstance(record.logfile,
                             file) and record.logfile.name != "<fdopen>":
-                record.logfile = record.logfile.name
+                record.logname = record.logfile.name
+
+                msg = 'Sending file "{}".'.format(record.logname)
             else:
                 logger.warning(
                     "Logname parameter is mandatory if logfile is file object.")
                 return
 
+        else:
+            msg = 'Sending file "{}" as "{}".'.format(
+                os.path.abspath(record.logfile), record.logname)
+
+        if isinstance(record.logfile, str):
+            record.logfile = open(record.logfile, 'rb')
+
+        self.record_queue.put((_FILE, record))
+
+        self._emit_log(teres.ReportRecord(teres.FILE, msg))
+
+    def _thread_emit_file(self, record):
+        """
+        Send file record to beaker.
+        """
         url = self._generate_url(record)
 
         position = record.logfile.tell()
