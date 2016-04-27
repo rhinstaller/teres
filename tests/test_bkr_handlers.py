@@ -8,6 +8,7 @@ sys.path.insert(0, my_path + '/../')
 import requests
 import teres
 import teres.bkr_handlers
+import tempfile
 
 ENV = not bool(os.environ.get("BEAKER_RECIPE_ID") and os.environ.get("BEAKER_LAB_CONTROLLER_URL"))
 
@@ -22,9 +23,16 @@ class BkrEnv(unittest.TestCase):
 
         self.reporter.add_handler(self.handler)
 
+    def assertEqualLong(self, test, reference):
+        for t, r in zip(test.splitlines(), reference.splitlines()):
+            self.assertEqual(t, r)
+
 
 class BkrTest(BkrEnv):
-    def test_messages(self):
+    def test_simple_messages(self):
+        """
+        Test posting of simple messages to beaker.
+        """
         self.reporter.log_error("error msg")
         self.reporter.log_fail("fail msg")
         self.reporter.log_pass("pass msg")
@@ -34,7 +42,6 @@ class BkrTest(BkrEnv):
         self.reporter.test_end()
 
         # Check the results.
-
         ref = """:: [   ERROR  ] :: error msg
 :: [   FAIL   ] :: fail msg
 :: [   PASS   ] :: pass msg
@@ -42,9 +49,33 @@ class BkrTest(BkrEnv):
 """
 
         url = self.handler._get_task_url() + "logs/testout.log"
-        log = requests.get(url)
+        content = requests.get(url).content
 
-        self.assertEqual(ref,log.content)
+        self.assertEqualLong(ref, content)
+
+    def test_file_names(self):
+        """
+        Test file naming of logs sent to beaker.
+        """
+        self.reporter.send_file('/proc/cmdline')
+        self.reporter.send_file('/proc/cpuinfo', logname="custom_file_name")
+
+        f = open("/tmp/foo bar", "w+")
+        f.close()
+        self.reporter.send_file('/tmp/foo bar')
+
+        self.reporter.test_end()
+
+        # Check the results.
+        ref = """:: [   FILE   ] :: Sending file "/proc/cmdline" as "cmdline".
+:: [   FILE   ] :: Sending file "/proc/cpuinfo" as "custom_file_name".
+:: [   FILE   ] :: Sending file "/tmp/foo bar" as "foo_bar".
+"""
+
+        url = self.handler._get_task_url() + "logs/testout.log"
+        content = requests.get(url).content
+
+        self.assertEqualLong(ref, content)
 
 if __name__ == '__main__':
     unittest.main()
