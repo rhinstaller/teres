@@ -39,6 +39,7 @@ NONE = 0
 # used in cleanup function
 _PID = os.getpid()
 
+
 def result_to_name(result):
     """
     Translate reporter result to string.

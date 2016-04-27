@@ -331,7 +331,8 @@ class ThinBkrHandler(teres.Handler):
             except Queue.Empty:
                 pass
 
-            if first_flush or (not synced and (time.time() - last_update > self.flush_delay)):
+            if first_flush or (not synced and
+                               (time.time() - last_update > self.flush_delay)):
                 self._thread_flush()
                 synced = True
                 first_flush = False
