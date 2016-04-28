@@ -24,8 +24,15 @@ class BkrEnv(unittest.TestCase):
         self.reporter.add_handler(self.handler)
 
     def assertEqualLong(self, test, reference):
-        for t, r in zip(test.splitlines(), reference.splitlines()):
-            self.assertEqual(t, r)
+
+        t = test.splitlines()
+        r = reference.splitlines()
+
+        try:
+            for i in range(max(len(t), len(r))):
+                self.assertEqual(t[i], r[i])
+        except IndexError:
+            self.fail("Test string and reference string are of different length.")
 
 
 class BkrTest(BkrEnv):
@@ -64,12 +71,18 @@ class BkrTest(BkrEnv):
         f.close()
         self.reporter.send_file('/tmp/foo bar')
 
+        tmp = tempfile.TemporaryFile()
+        tmp.write("I'm a temporary file.")
+        self.reporter.send_file(tmp)
+        self.reporter.send_file(tmp, logname="tmp_file")
+
         self.reporter.test_end()
 
         # Check the results.
         ref = """:: [   FILE   ] :: Sending file "/proc/cmdline" as "cmdline".
 :: [   FILE   ] :: Sending file "/proc/cpuinfo" as "custom_file_name".
 :: [   FILE   ] :: Sending file "/tmp/foo bar" as "foo_bar".
+:: [   FILE   ] :: Sending file "tmp_file".
 """
 
         url = self.handler._get_task_url() + "logs/testout.log"
