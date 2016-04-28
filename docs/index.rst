@@ -131,7 +131,8 @@ during the initialization.
 .. py:class:: LoggingHandler(name, handlers[, result=teres.INFO[, dest="/tmp/"]])
 
     When creating an instance of this class directory called `name` is created
-    at `dest` to store log files. The `result` level is translated into python
+    at `dest` to store log files. If `dest` is set to `None`, files are only
+    recorded and not copied. The `result` level is translated into python
     logging level and set as logging level.
 
 :mod:`bkr_handlers`

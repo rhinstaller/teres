@@ -60,7 +60,9 @@ class LoggingHandler(teres.Handler):
 
         self.name = name
         self.dest = dest
-        self.logdir = tempfile.mkdtemp(prefix=self.name, dir=self.dest)
+        self.logdir = None
+        if dest is not None:
+            self.logdir = tempfile.mkdtemp(prefix=self.name, dir=self.dest)
 
         self.logger = logging.getLogger(name)
         self.logger.setLevel(_result_to_level(self.result_level))
@@ -80,10 +82,15 @@ class LoggingHandler(teres.Handler):
             record.logname = os.path.basename(record.logfile).replace(' ', '_')
 
         if record.msg is None:
-            record.msg = "Copying {} to: {}".format(
-                record.logfile, self.logdir + "/" + record.logname)
+            if self.logdir is None:
+                record.msg = 'Reporting file "{}" with name "{}".'.format(
+                    record.logfile, record.logname)
+            else:
+                record.msg = 'Copying "{}" to: "{}"'.format(
+                    record.logfile, self.logdir + "/" + record.logname)
 
-        shutil.copy(record.logfile, self.logdir + "/" + record.logname)
+        if self.logdir is not None:
+            shutil.copy(record.logfile, self.logdir + "/" + record.logname)
 
         self.logger.log(
             _result_to_level(record.result), self._format_msg(record))
