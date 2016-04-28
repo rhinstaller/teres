@@ -117,7 +117,7 @@ class Reporter(object):
 
     def __init__(self):
         super(Reporter, self).__init__()
-        self.result = NONE
+        self.overall_result = NONE
         self.handlers = []
         self.finished = False
 
@@ -139,29 +139,29 @@ class Reporter(object):
         """
         Log a message with specific level.
         """
-        if result >= PASS:
-            self.result = max(self.result, result)
+        if FILE > result >= PASS:
+            self.overall_result = max(self.overall_result, result)
             self._log(result, msg, flags=flags)
 
     def log_error(self, msg, flags=None):
         """
         Log an ERROR message.
         """
-        self.result = max(self.result, ERROR)
+        self.overall_result = max(self.overall_result, ERROR)
         self._log(ERROR, msg, flags=flags)
 
     def log_fail(self, msg, flags=None):
         """
         Log a FAIL message.
         """
-        self.result = max(self.result, FAIL)
+        self.overall_result = max(self.overall_result, FAIL)
         self._log(FAIL, msg, flags=flags)
 
     def log_pass(self, msg, flags=None):
         """
         Log a PASS message.
         """
-        self.result = max(self.result, PASS)
+        self.overall_result = max(self.overall_result, PASS)
         self._log(PASS, msg, flags=flags)
 
     def log_info(self, msg, flags=None):
