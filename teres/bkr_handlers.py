@@ -105,7 +105,8 @@ class ThinBkrHandler(teres.Handler):
                  recipe_id=None,
                  lab_controller_url=None,
                  disable_subtasks=False,
-                 flush_delay=15):
+                 flush_delay=15,
+                 report_overall=None):
         super(ThinBkrHandler, self).__init__(result_level, process_logs)
 
         # This is a thread safe queue to pass logs and files to thread that
@@ -142,6 +143,17 @@ class ThinBkrHandler(teres.Handler):
         self.async_thread = threading.Thread(target=self._thread_loop)
         self.async_thread.daemon = True
         self.async_thread.start()
+
+        # Track overall result.
+        self.report_overall = report_overall
+        self.overall_result = teres.NONE
+
+    def _track_result(self, result):
+        """
+        Method used to update the overall result.
+        """
+        if result in (teres.FAIL, teres.PASS, teres.ERROR):
+            self.overall_result = max(self.overall_result, result)
 
     def _get_recipe(self):
         """
@@ -208,13 +220,13 @@ class ThinBkrHandler(teres.Handler):
         """
         Pass log records to the record_queue.
         """
+        self._track_result(record.result)
         self.record_queue.put((_LOG, record))
 
     def _thread_emit_log(self, record):
         """
         Send log record to beaker.
         """
-
         # Without any flags specified just write the message into the log file.
         self.task_log.write(_format_msg(record))
 
@@ -245,7 +257,7 @@ class ThinBkrHandler(teres.Handler):
                 self.default_log_dest = self.last_result_url
 
         if self.first_flush:
-            self.firt_flush = False
+            self.first_flush = False
             self._thread_flush()
 
     def _emit_file(self, record):
@@ -317,7 +329,14 @@ class ThinBkrHandler(teres.Handler):
         Set handler state to finished. Join the thread for asynchronous
         communication with beaker and finally close task log.
         """
+        msg = "Test finished with the result: {}".format(teres.result_to_name(self.overall_result))
+        self._emit_log(teres.ReportRecord(self.overall_result, msg))
+
+        if self.report_overall is not None:
+            self._emit_log(teres.ReportRecord(self.overall_result, self.report_overall, flags={SUBTASK_RESULT: True}))
+
         self.finished = True
+
         self.async_thread.join()
         self.task_log.close()
 
