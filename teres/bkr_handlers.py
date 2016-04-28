@@ -137,6 +137,7 @@ class ThinBkrHandler(teres.Handler):
         # thread loop.
         self.finished = False
         self.flush_delay = flush_delay
+        self.first_flush = True
         self.async_thread = threading.Thread(target=self._thread_loop)
         self.async_thread.daemon = True
         self.async_thread.start()
@@ -242,6 +243,10 @@ class ThinBkrHandler(teres.Handler):
             if record.flags.get(DEFAULT_LOG_DEST, False):
                 self.default_log_dest = self.last_result_url
 
+        if self.first_flush:
+            self.firt_flush = False
+            self._thread_flush()
+
     def _emit_file(self, record):
         """
         Pass file records to the record_queue.
@@ -326,7 +331,6 @@ class ThinBkrHandler(teres.Handler):
         called.
         """
         synced = True
-        first_flush = True
         last_update = time.time()
 
         while not (self.finished and self.record_queue.empty()):
@@ -342,11 +346,9 @@ class ThinBkrHandler(teres.Handler):
             except Queue.Empty:
                 pass
 
-            if first_flush or (not synced and
-                               (time.time() - last_update > self.flush_delay)):
+            if not synced and (time.time() - last_update > self.flush_delay):
                 self._thread_flush()
                 synced = True
-                first_flush = False
                 last_update = time.time()
 
         # Last flush after close() was called.
