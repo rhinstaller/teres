@@ -140,7 +140,7 @@ during the initialization.
 
 .. py:module:: teres.bkr_handlers
 
-.. py:class:: ThinBkrHandler([result=teres.INFO[, task_log_name="testout.log"[, task_log_dir="/tmp/"[, recipe_id=None [, lab_controller_url=None[, disable_subtasks=False[, flush_delay=15]]]]]]])
+.. py:class:: ThinBkrHandler([result=teres.INFO[, task_log_name="testout.log"[, task_log_dir="/tmp/"[, recipe_id=None [, lab_controller_url=None[, disable_subtasks=False[, flush_delay=15[, report_overall=None]]]]]]]])
 
     This handler class supports reporting to the beaker_ lab controller using its
     API. This includes converting teres result levels to those of a beaker,
@@ -155,6 +155,7 @@ during the initialization.
     :param str lab_controller_url: URL for communitcating with beaker.
     :param bool disable_subtasks: This parameter can completely disable creation of subtasks in beaker.
     :param int flush_delay: Delay between flushing the task log.
+    :param str report_overall: Create subtask result with the overall result.
 
     If `recipe_id` and `lab_controller_url` aren't provided constructor tries to
     get the values from environment variables as it is defined in beaker_ API
