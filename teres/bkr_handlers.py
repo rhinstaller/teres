@@ -44,6 +44,7 @@ _LOG = object()
 _FILE = object()
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def _result_to_bkr(result):
@@ -251,32 +252,29 @@ class ThinBkrHandler(teres.Handler):
         """
         Pass file records to the record_queue.
         """
-        if record.logname is None:
-            if isinstance(record.logfile, str):
+        # Process files specified by path.
+        if isinstance(record.logfile, str):
+            if record.logname is None:
                 record.logname = _path_to_name(record.logfile)
 
-                msg = 'Sending file "{}" as "{}".'.format(record.logfile,
-                                                          record.logname)
+            msg = 'Sending file "{}" as "{}".'.format(record.logfile,
+                                                      record.logname)
 
-            elif isinstance(record.logfile,
-                            file) and record.logfile.name != "<fdopen>":
-                record.logname = record.logfile.name
+            record.logfile = open(record.logfile, 'rb')
 
-                msg = 'Sending file "{}".'.format(record.logname)
-            else:
+        elif isinstance(record.logfile, file):
+            # Take care of temporary files (created by mkstemp).
+            if record.logfile.name == "<fdopen>" and record.logname is None:
                 logger.warning(
                     "Logname parameter is mandatory if logfile is file object.")
                 return
+            # Regular files without name provided.
+            elif record.logname is None:
+                record.logname = record.logfile.name
 
-        else:
-            msg = 'Sending file "{}" as "{}".'.format(
-                os.path.abspath(record.logfile), record.logname)
-
-        if isinstance(record.logfile, str):
-            record.logfile = open(record.logfile, 'rb')
+            msg = 'Sending file "{}".'.format(record.logname)
 
         self.record_queue.put((_FILE, record))
-
         self._emit_log(teres.ReportRecord(teres.FILE, msg))
 
     def _thread_emit_file(self, record):
