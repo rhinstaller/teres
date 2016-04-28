@@ -14,10 +14,10 @@ ENV = not bool(os.environ.get("BEAKER_RECIPE_ID") and os.environ.get("BEAKER_LAB
 
 @unittest.skipIf(ENV, "Beaker environment variables are not set.")
 class BkrEnv(unittest.TestCase):
-    def setUp(self):
+    def mySetUp(self, *args, **kwargs):
         self.reporter = teres.Reporter()
 
-        self.handler = teres.bkr_handlers.ThinBkrHandler()
+        self.handler = teres.bkr_handlers.ThinBkrHandler(*args, **kwargs)
         self.assertIsNotNone(self.handler.recipe_id)
         self.assertIsNotNone(self.handler.lab_controller_url)
 
@@ -32,6 +32,13 @@ class BkrEnv(unittest.TestCase):
             for i in range(max(len(t), len(r))):
                 self.assertEqual(t[i], r[i])
         except IndexError:
+            print()
+            print()
+            print("Test string:\n{}".format(test))
+            print()
+            print("Reference string:\n{}".format(reference))
+            print()
+
             self.fail("Test string and reference string are of different length.")
 
 
@@ -40,6 +47,9 @@ class BkrTest(BkrEnv):
         """
         Test posting of simple messages to beaker.
         """
+        test = "test_simple_messages"
+        self.mySetUp(task_log_name=test)
+
         self.reporter.log_error("error msg")
         self.reporter.log_fail("fail msg")
         self.reporter.log_pass("pass msg")
@@ -53,17 +63,21 @@ class BkrTest(BkrEnv):
 :: [   FAIL   ] :: fail msg
 :: [   PASS   ] :: pass msg
 :: [   INFO   ] :: info msg
+:: [   ERROR  ] :: Test finished with the result: ERROR
 """
 
-        url = self.handler._get_task_url() + "logs/testout.log"
+        url = self.handler._get_task_url() + "logs/" + test
         content = requests.get(url).content
 
-        self.assertEqualLong(ref, content)
+        self.assertEqualLong(content, ref)
 
     def test_file_names(self):
         """
         Test file naming of logs sent to beaker.
         """
+        test = "test_file_names"
+        self.mySetUp(task_log_name=test)
+
         self.reporter.send_file('/proc/cmdline')
         self.reporter.send_file('/proc/cpuinfo', logname="custom_file_name")
 
@@ -83,12 +97,29 @@ class BkrTest(BkrEnv):
 :: [   FILE   ] :: Sending file "/proc/cpuinfo" as "custom_file_name".
 :: [   FILE   ] :: Sending file "/tmp/foo bar" as "foo_bar".
 :: [   FILE   ] :: Sending file "tmp_file".
+:: [   NONE   ] :: Test finished with the result: NONE
 """
 
-        url = self.handler._get_task_url() + "logs/testout.log"
+        url = self.handler._get_task_url() + "logs/" + test
         content = requests.get(url).content
 
-        self.assertEqualLong(ref, content)
+        self.assertEqualLong(content, ref)
+
+    def test_overall_result(self):
+        self.mySetUp(task_log_name="test_overall_result", report_overall="Overall result")
+
+        self.reporter.log_fail("This test has successfully failed.")
+        self.reporter.test_end()
+
+        # Check the results.
+        ref = """:: [   FAIL   ] :: This test has successfully failed.
+:: [   FAIL   ] :: Test finished with the result: FAIL
+:: [   FAIL   ] :: Overall result"""
+
+        url = self.handler._get_task_url() + "logs/test_overall_result"
+        content = requests.get(url).content
+
+        self.assertEqualLong(content, ref)
 
 if __name__ == '__main__':
     unittest.main()
