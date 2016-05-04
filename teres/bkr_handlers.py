@@ -329,11 +329,14 @@ class ThinBkrHandler(teres.Handler):
         Set handler state to finished. Join the thread for asynchronous
         communication with beaker and finally close task log.
         """
-        msg = "Test finished with the result: {}".format(teres.result_to_name(self.overall_result))
+        msg = "Test finished with the result: {}".format(teres.result_to_name(
+            self.overall_result))
         self._emit_log(teres.ReportRecord(self.overall_result, msg))
 
         if self.report_overall is not None:
-            self._emit_log(teres.ReportRecord(self.overall_result, self.report_overall, flags={SUBTASK_RESULT: True}))
+            self._emit_log(teres.ReportRecord(self.overall_result,
+                                              self.report_overall,
+                                              flags={SUBTASK_RESULT: True}))
 
         self.finished = True
 
