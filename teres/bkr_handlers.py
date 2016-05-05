@@ -45,9 +45,10 @@ class Flag(object):
         return "{}".format(self.name)
 
     def __repr__(self):
-        return "{} {} object at {}>".format(str(type(self))[:-1],
-                                            self.name,
-                                            hex(id(self)))
+        return "<{}.{} '{}' object at {}>".format(type(self).__module__,
+                                                  type(self).__name__,
+                                                  self.name,
+                                                  hex(id(self)))
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
