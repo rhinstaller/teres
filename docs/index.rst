@@ -38,7 +38,9 @@ actual reporting.
 .. py:class:: Reporter()
 
     This is the class that provides the API. It hase to be initialized with set
-    of handlers in a similar manner as python logging interface.
+    of handlers in a similar manner as python logging interface. To get an
+    instance of the :py:class:`Reporter` class use :py:meth:`get_reporter()`
+    method.
 
     .. py:method:: get_reporter()
 
