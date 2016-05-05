@@ -32,12 +32,31 @@ import time
 import Queue
 import StringIO
 
+
 # Flags defintion
-TASK_LOG_FILE = object()  # boolean
-SUBTASK_RESULT = object()  # optional parameter: path
-SCORE = object()  # mandatory parameter: score
-SUBTASK_LOG_FILE = object()  # optional parameter: result url
-DEFAULT_LOG_DEST = object()  # boolean
+class Flag(object):
+    """
+    Class for defining flags used for modification of ThinBkrHandler behaviour.
+    """
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return "{}".format(self.name)
+
+    def __repr__(self):
+        return "{} {} object at {}>".format(str(type(self))[:-1],
+                                            self.name,
+                                            hex(id(self)))
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+TASK_LOG_FILE = Flag('TASK_LOG_FILE')  # boolean
+SUBTASK_RESULT = Flag('SUBTASK_RESULT') # optional parameter: path
+SCORE = Flag('SCORE')  # mandatory parameter: score
+SUBTASK_LOG_FILE = Flag('SUBTASK_LOG_FILE')  # optional parameter: result url
+DEFAULT_LOG_DEST = Flag('DEFAULT_LOG_DEST')  # boolean
 
 # Define record types since we need to propagate information about the type from
 # the parent class.
