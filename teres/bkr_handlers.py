@@ -220,6 +220,8 @@ class ThinBkrHandler(teres.Handler):
         """
         Pass log records to the record_queue.
         """
+        logger.debug("ThinBkrHandler: calling _emit_log with record %s",
+                     record)
         self._track_result(record.result)
         self.record_queue.put((_LOG, record))
 
@@ -229,6 +231,8 @@ class ThinBkrHandler(teres.Handler):
         """
         # Without any flags specified just write the message into the log file.
         self.task_log.write(_format_msg(record))
+        logger.debug("ThinBkrHandler: calling _thread_emit_log with record %s",
+                     record)
 
         subtask_result = record.flags.get(SUBTASK_RESULT, False)
         if subtask_result and not self.disable_subtasks:
@@ -278,7 +282,7 @@ class ThinBkrHandler(teres.Handler):
             # Take care of temporary files (created by mkstemp).
             if record.logfile.name == "<fdopen>" and record.logname is None:
                 logger.warning(
-                    "Logname parameter is mandatory if logfile is file object.")
+                    "Logname parameter is mandatory if logfile is file like object.")
                 return
             # Regular files without name provided.
             elif record.logname is None:
@@ -299,6 +303,9 @@ class ThinBkrHandler(teres.Handler):
         record.logfile.seek(0)
         payload = record.logfile.read()
         record.logfile.seek(position)
+
+        logger.debug("ThinBkrHandler: calling _thread_emit_file with: %s",
+                     record.logname)
 
         req = requests.put(url, data=payload)
         if req.status_code != 204:
@@ -350,6 +357,7 @@ class ThinBkrHandler(teres.Handler):
         communication. Although it has to wait for the join when self.close() is
         called.
         """
+        logger.info("ThinBkrHandler: start _thread_loop")
         synced = True
         last_update = time.time()
 
@@ -374,3 +382,5 @@ class ThinBkrHandler(teres.Handler):
         # Last flush after close() was called.
         if not synced:
             self._thread_flush()
+
+        logger.info("ThinBkrHandler: exitting _thread_loop")
