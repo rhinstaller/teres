@@ -27,16 +27,39 @@ import requests
 import libxml2
 import logging
 import teres
-import Queue
 import threading
 import time
+import Queue
+import StringIO
+
 
 # Flags defintion
-TASK_LOG_FILE = object()  # boolean
-SUBTASK_RESULT = object()  # optional parameter: path
-SCORE = object()  # mandatory parameter: score
-SUBTASK_LOG_FILE = object()  # optional parameter: result url
-DEFAULT_LOG_DEST = object()  # boolean
+class Flag(object):
+    """
+    Class for defining flags used for modification of ThinBkrHandler behaviour.
+    """
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return "{}".format(self.name)
+
+    def __repr__(self):
+        return "<{}.{} '{}' object at {}>".format(type(self).__module__,
+                                                  type(self).__name__,
+                                                  self.name,
+                                                  hex(id(self)))
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        return self.name == other.name
+
+TASK_LOG_FILE = Flag('TASK_LOG_FILE')  # boolean
+SUBTASK_RESULT = Flag('SUBTASK_RESULT') # optional parameter: path
+SCORE = Flag('SCORE')  # mandatory parameter: score
+SUBTASK_LOG_FILE = Flag('SUBTASK_LOG_FILE')  # optional parameter: result url
+DEFAULT_LOG_DEST = Flag('DEFAULT_LOG_DEST')  # boolean
 
 # Define record types since we need to propagate information about the type from
 # the parent class.
@@ -220,6 +243,8 @@ class ThinBkrHandler(teres.Handler):
         """
         Pass log records to the record_queue.
         """
+        logger.debug("ThinBkrHandler: calling _emit_log with record %s",
+                     record)
         self._track_result(record.result)
         self.record_queue.put((_LOG, record))
 
@@ -229,6 +254,8 @@ class ThinBkrHandler(teres.Handler):
         """
         # Without any flags specified just write the message into the log file.
         self.task_log.write(_format_msg(record))
+        logger.debug("ThinBkrHandler: calling _thread_emit_log with record %s",
+                     record)
 
         subtask_result = record.flags.get(SUBTASK_RESULT, False)
         if subtask_result and not self.disable_subtasks:
@@ -278,13 +305,27 @@ class ThinBkrHandler(teres.Handler):
             # Take care of temporary files (created by mkstemp).
             if record.logfile.name == "<fdopen>" and record.logname is None:
                 logger.warning(
-                    "Logname parameter is mandatory if logfile is file object.")
+                    "Logname parameter is mandatory if logfile is file like object.")
                 return
             # Regular files without name provided.
             elif record.logname is None:
                 record.logname = record.logfile.name
 
             msg = 'Sending file "{}".'.format(record.logname)
+
+        elif isinstance(record.logfile, StringIO.StringIO):
+            # Take care of StringIO file like objects.
+            if record.logname is None:
+                logger.warning(
+                    "Logname parameter is mandatory if logfile is file like object.")
+                return
+            msg = 'Sending file "{}".'.format(record.logname)
+
+        else:
+            logger.error("Unable to handle this file type.")
+
+        logger.debug("ThinBkrHandler: calling _emit_file: %s as %s",
+                     record.logfile, record.logname)
 
         self.record_queue.put((_FILE, record))
         self._emit_log(teres.ReportRecord(teres.FILE, msg))
@@ -299,6 +340,9 @@ class ThinBkrHandler(teres.Handler):
         record.logfile.seek(0)
         payload = record.logfile.read()
         record.logfile.seek(position)
+
+        logger.debug("ThinBkrHandler: calling _thread_emit_file with: %s",
+                     record.logname)
 
         req = requests.put(url, data=payload)
         if req.status_code != 204:
@@ -329,11 +373,14 @@ class ThinBkrHandler(teres.Handler):
         Set handler state to finished. Join the thread for asynchronous
         communication with beaker and finally close task log.
         """
-        msg = "Test finished with the result: {}".format(teres.result_to_name(self.overall_result))
+        msg = "Test finished with the result: {}".format(teres.result_to_name(
+            self.overall_result))
         self._emit_log(teres.ReportRecord(self.overall_result, msg))
 
         if self.report_overall is not None:
-            self._emit_log(teres.ReportRecord(self.overall_result, self.report_overall, flags={SUBTASK_RESULT: True}))
+            self._emit_log(teres.ReportRecord(self.overall_result,
+                                              self.report_overall,
+                                              flags={SUBTASK_RESULT: True}))
 
         self.finished = True
 
@@ -347,6 +394,7 @@ class ThinBkrHandler(teres.Handler):
         communication. Although it has to wait for the join when self.close() is
         called.
         """
+        logger.info("ThinBkrHandler: start _thread_loop")
         synced = True
         last_update = time.time()
 
@@ -371,3 +419,5 @@ class ThinBkrHandler(teres.Handler):
         # Last flush after close() was called.
         if not synced:
             self._thread_flush()
+
+        logger.info("ThinBkrHandler: exitting _thread_loop")

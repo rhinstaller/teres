@@ -23,7 +23,12 @@ module.
 """
 
 import os
+import sys
+import logging
 import atexit
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 # These are default test results and their values. This should be reset to 0
 # after particular test is finished.
@@ -62,11 +67,26 @@ def cleanup():
     """
     Cleanup method.
     """
+    # Catch and report possible tracebacks.
+    import traceback
+    import StringIO
+
+    logger.info("Reporter: calling cleanup()")
+
+    reporter = Reporter.get_reporter()
+
+    tb = getattr(sys, "last_traceback", None)
+
+    if tb is not None:
+        fo = StringIO.StringIO("\n".join(traceback.format_tb(tb)))
+
+        reporter.send_file(fo, "traceback.log")
+
     # when somebody uses fork() and the process ends, don't do anything,
     # since this is handled by parent process
     if _PID != os.getpid():
         return
-    Reporter.get_reporter().test_end()
+    reporter.test_end(clean_end=False)
 
 
 class HandlerError(Exception):
@@ -96,6 +116,15 @@ class ReportRecord(object):
             flags = {}
         self.flags = flags
 
+    def __str__(self):
+        return str({
+            "result": self.result,
+            "msg": self.msg,
+            "logfile": self.logfile,
+            "logname": self.logname,
+            "flags": self.flags,
+        })
+
 
 class Reporter(object):
     """
@@ -111,6 +140,7 @@ class Reporter(object):
         call thus cereating a singleton.
         """
         if Reporter._instance is None:
+            logger.info("Reporter: creating new instance.")
             Reporter._instance = Reporter()
 
         return Reporter._instance
@@ -122,13 +152,18 @@ class Reporter(object):
         self.finished = False
 
     def __del__(self):
+        logger.info("Reporter: calling __del__")
         if not self.finished:
             self.test_end()
 
-    def test_end(self):
+    def test_end(self, clean_end=True):
         """
         Flush all results and clean up.
         """
+        logger.info("Reporter: calling test_end")
+        if not clean_end:
+            self.log_error("Test ended unexpectedly.")
+
         self.finished = True
         for handler in self.handlers:
             handler.close()
@@ -180,6 +215,8 @@ class Reporter(object):
         """
         Send log file.
         """
+        logger.info("Reporter: calling send_file(%s, %s, %s, %s)", logfile,
+                    logname, msg, flags)
         self._log(FILE, msg=msg, logfile=logfile, logname=logname, flags=flags)
 
     def _log(self, result, msg, **kwargs):
@@ -187,6 +224,7 @@ class Reporter(object):
          Low level logging routine.
         """
         record = ReportRecord(result, msg, **kwargs)
+        logger.info("Reporter: calling _log with record: %s", record)
 
         self.call_handlers(record)
 
@@ -194,6 +232,7 @@ class Reporter(object):
         """
         Add the specified handler to this reporter.
         """
+        logger.info("Reporter: calling add_handler with %s", handler)
         if self.finished:
             raise Exception("Cannot add handler if the test ended.")
         if handler not in self.handlers:
@@ -203,6 +242,7 @@ class Reporter(object):
         """
         Remove the specified handler from this reporter.
         """
+        logger.info("Reporter: calling remove_handler with %s", handler)
         if handler in self.handlers:
             self.handlers.remove(handler)
 
@@ -210,6 +250,7 @@ class Reporter(object):
         """
         Pass the record to all registered handlers.
         """
+        logger.debug("Reporter: calling call_handlers on %s", self.handlers)
         for handler in self.handlers:
             handler.emit(record)
 
