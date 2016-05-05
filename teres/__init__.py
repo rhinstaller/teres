@@ -67,11 +67,26 @@ def cleanup():
     """
     Cleanup method.
     """
+    # Catch and report possible tracebacks.
+    import traceback
+    import StringIO
+
+    logger.info("Reporter: calling cleanup()")
+
+    reporter = Reporter.get_reporter()
+
+    tb = getattr(sys, "last_traceback", None)
+
+    if tb is not None:
+        fo = StringIO.StringIO("\n".join(traceback.format_tb(tb)))
+
+        reporter.send_file(fo, "traceback.log")
+
     # when somebody uses fork() and the process ends, don't do anything,
     # since this is handled by parent process
     if _PID != os.getpid():
         return
-    Reporter.get_reporter().test_end(clean_end=False)
+    reporter.test_end(clean_end=False)
 
 
 class HandlerError(Exception):

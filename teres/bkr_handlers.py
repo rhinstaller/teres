@@ -27,9 +27,10 @@ import requests
 import libxml2
 import logging
 import teres
-import Queue
 import threading
 import time
+import Queue
+import StringIO
 
 # Flags defintion
 TASK_LOG_FILE = object()  # boolean
@@ -289,6 +290,20 @@ class ThinBkrHandler(teres.Handler):
                 record.logname = record.logfile.name
 
             msg = 'Sending file "{}".'.format(record.logname)
+
+        elif isinstance(record.logfile, StringIO.StringIO):
+            # Take care of StringIO file like objects.
+            if record.logname is None:
+                logger.warning(
+                    "Logname parameter is mandatory if logfile is file like object.")
+                return
+            msg = 'Sending file "{}".'.format(record.logname)
+
+        else:
+            logger.error("Unable to handle this file type.")
+
+        logger.debug("ThinBkrHandler: calling _emit_file: %s as %s",
+                     record.logfile, record.logname)
 
         self.record_queue.put((_FILE, record))
         self._emit_log(teres.ReportRecord(teres.FILE, msg))
