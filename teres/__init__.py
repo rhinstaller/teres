@@ -66,7 +66,7 @@ def cleanup():
     # since this is handled by parent process
     if _PID != os.getpid():
         return
-    Reporter.get_reporter().test_end()
+    Reporter.get_reporter().test_end(clean_end=False)
 
 
 class HandlerError(Exception):
@@ -125,10 +125,13 @@ class Reporter(object):
         if not self.finished:
             self.test_end()
 
-    def test_end(self):
+    def test_end(self, clean_end=True):
         """
         Flush all results and clean up.
         """
+        if not clean_end:
+            self.log_error("Test ended unexpectedly.")
+
         self.finished = True
         for handler in self.handlers:
             handler.close()
