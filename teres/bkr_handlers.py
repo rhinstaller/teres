@@ -50,6 +50,8 @@ class Flag(object):
                                             hex(id(self)))
 
     def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
         return self.name == other.name
 
 TASK_LOG_FILE = Flag('TASK_LOG_FILE')  # boolean
