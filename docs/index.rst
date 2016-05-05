@@ -31,14 +31,21 @@ tests only in the main process, enabling usage of `os.fork`.
 The API
 -------
 
-The `teres` module provides a `Reporter` class that defines the API for the end
-user. Internally `Reporeter` can register multiple handlers thaking care of
+The `teres` module provides a :py:class:`Reporter` class that defines the API for the end
+user. Internally :py:class:`Reporeter` can register multiple handlers thaking care of
 actual reporting.
 
 .. py:class:: Reporter()
 
     This is the class that provides the API. It hase to be initialized with set
     of handlers in a similar manner as python logging interface.
+
+    .. py:method:: get_reporter()
+
+        Since :py:class:`Reporter` class is designed as a singleton (there can
+        be only one instance of this class) initializing it without using this
+        method can lead to **undefined behavior**. (This is the **only**
+        supported way of getting the class instance.)
 
     .. py:method:: add_handler(handler)
 
