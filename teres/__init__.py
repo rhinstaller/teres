@@ -26,6 +26,7 @@ import os
 import sys
 import logging
 import atexit
+import traceback
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -62,13 +63,57 @@ def result_to_name(result):
     return mapping[result]
 
 
+def dump_tb(tb):
+    """
+    Routine for reporting tracebacks.
+    """
+    import types
+    import tempfile
+    import cPickle
+
+    def dump_tr(obj):
+        if type(obj) in (types.ModuleType,
+                         types.FunctionType,
+                         types.TypeType,
+                         types.GeneratorType,
+                         types.CodeType,
+                         types.MethodType,
+                         types.FileType,
+                         types.EllipsisType,
+                         types.TracebackType,
+                         types.FrameType,
+                         types.BufferType,
+                         types.DictProxyType,
+                         types.NotImplementedType,
+                         types.GetSetDescriptorType,
+                         types.MemberDescriptorType, ):
+            return repr(obj)
+        return obj
+
+    dump = []
+
+    while tb is not None:
+        entry = {}
+        frame = tb.tb_frame
+        entry["stack"] = traceback.format(frame)[-1]
+        entry["locals"] = {
+            key: dump_tr(val)
+            for key, val in frame.f_locals.iteritems()
+        }
+        dump.append(entry)
+        tb = tb.tb_next
+
+    df = tempfile.TemporaryFile()
+    cPickle.dump(dump, df)
+
+    return df
+
+
 @atexit.register
 def cleanup():
     """
     Cleanup method.
     """
-    # Catch and report possible tracebacks.
-    import traceback
     import StringIO
 
     logger.info("Reporter: calling cleanup()")
@@ -78,12 +123,14 @@ def cleanup():
     tb = getattr(sys, "last_traceback", None)
 
     if tb is not None:
-        fo = StringIO.StringIO("\n".join(traceback.format_tb(tb)))
-
+        fo = StringIO.StringIO("".join(traceback.format_tb(tb)))
         reporter.send_file(fo, "traceback.log")
 
-    # when somebody uses fork() and the process ends, don't do anything,
-    # since this is handled by parent process
+        dump = dump_tb(tb)
+        reporter.send_file(dump, "traceback.dump")
+
+# when somebody uses fork() and the process ends, don't do anything,
+# since this is handled by parent process
     if _PID != os.getpid():
         return
     reporter.test_end(clean_end=False)
