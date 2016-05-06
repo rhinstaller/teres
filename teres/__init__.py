@@ -95,7 +95,7 @@ def dump_tb(tb):
     while tb is not None:
         entry = {}
         frame = tb.tb_frame
-        entry["stack"] = traceback.format(frame)[-1]
+        entry["stack"] = traceback.format_stack(frame)[-1]
         entry["locals"] = {
             key: dump_tr(val)
             for key, val in frame.f_locals.iteritems()
