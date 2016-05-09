@@ -144,7 +144,9 @@ class ThinBkrHandler(teres.Handler):
 
         if self.recipe_id is None or self.lab_controller_url is None:
             raise ThinBkrHandlerError(
-                "Both recipe_id and lab_controller_url are mandatory as parameters or environment variables (see beaker API).")
+                """Both recipe_id and lab_controller_url are mandatory as parameters or environment variables.
+# export BEAKER_RECIPE_ID=<id>
+# export BEAKER_LAB_CONTROLLER_URL=<lab controller url>""")
 
         self.default_log_dest = self._get_task_url()
         self.last_result_url = self.default_log_dest
