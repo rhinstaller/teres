@@ -72,23 +72,11 @@ def dump_tb(tb):
     import cPickle
 
     def dump_tr(obj):
-        if type(obj) in (types.ModuleType,
-                         types.FunctionType,
-                         types.TypeType,
-                         types.GeneratorType,
-                         types.CodeType,
-                         types.MethodType,
-                         types.FileType,
-                         types.EllipsisType,
-                         types.TracebackType,
-                         types.FrameType,
-                         types.BufferType,
-                         types.DictProxyType,
-                         types.NotImplementedType,
-                         types.GetSetDescriptorType,
-                         types.MemberDescriptorType, ):
+        try:
+            cPickle.dumps(obj)
+            return obj
+        except TypeError:
             return repr(obj)
-        return obj
 
     dump = []
 
