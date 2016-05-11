@@ -153,7 +153,7 @@ during the initialization.
 
     This handler class supports reporting to the beaker_ lab controller using its
     API. This includes converting teres result levels to those of a beaker,
-    reporting the results, uploading log files. :py:meth:
+    reporting the results, uploading log files.
 
     List of parameters:
 
