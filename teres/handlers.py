@@ -90,7 +90,14 @@ class LoggingHandler(teres.Handler):
                     record.logfile, self.logdir + "/" + record.logname)
 
         if self.logdir is not None:
-            shutil.copy(record.logfile, self.logdir + "/" + record.logname)
+            if isinstance(record.logfile, file):
+                position = record.logfile.tell()
+                record.logfile.seek(0)
+                with open(self.logdir + "/" + record.logname, 'w') as output:
+                    output.write(record.logfile.read())
+                record.logfile.seek(position)
+            else:
+                shutil.copy(record.logfile, self.logdir + "/" + record.logname)
 
         self.logger.log(
             _result_to_level(record.result), self._format_msg(record))
