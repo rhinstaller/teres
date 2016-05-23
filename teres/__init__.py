@@ -67,11 +67,13 @@ def dump_tb(tb):
     """
     Routine for reporting tracebacks.
     """
-    import types
     import tempfile
     import cPickle
 
     def dump_tr(obj):
+        """
+        Return pickleable objects or their repr().
+        """
         try:
             cPickle.dumps(obj)
             return obj
