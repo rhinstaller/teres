@@ -111,9 +111,11 @@ def cleanup():
     reporter = Reporter.get_reporter()
 
     tb = getattr(sys, "last_traceback", None)
+    vl = getattr(sys, "last_value", None)
 
     if tb is not None:
-        fo = StringIO.StringIO("".join(traceback.format_tb(tb)))
+        tb_msg = repr(vl) + '\n' + "".join(traceback.format_tb(tb))
+        fo = StringIO.StringIO(tb_msg)
         reporter.send_file(fo, "traceback.log")
 
         dump = dump_tb(tb)
