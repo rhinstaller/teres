@@ -96,7 +96,7 @@ def _format_msg(record):
 
     head = ":: [   " + res + " " * spaces + "] :: "
 
-    return head + record.msg + "\n"
+    return "{}{}\n".format(head, record.msg)
 
 
 def _path_to_name(path):
@@ -138,7 +138,7 @@ class ThinBkrHandler(teres.Handler):
 
         # Read beaker environment variables to be able to communicate with lab
         # controller.
-        self.recipe_id = recipe_id or os.environ.get("BEAKER_RECIPE_ID")
+        self.recipe_id = str(recipe_id) or os.environ.get("BEAKER_RECIPE_ID")
         self.lab_controller_url = lab_controller_url or os.environ.get(
             "BEAKER_LAB_CONTROLLER_URL")
 
