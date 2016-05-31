@@ -199,6 +199,9 @@ class Reporter(object):
         """
         Flush all results and clean up.
         """
+        if self.finished:
+            return
+
         logger.info("Reporter: calling test_end")
         if not clean_end:
             self.log_error("Test ended unexpectedly.")
