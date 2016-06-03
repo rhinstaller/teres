@@ -91,7 +91,7 @@ actual reporting.
         object is passed the read permissions are mandatory. The *logname*
         arguments provides custom log name.
 
-    .. py:method:: test_end()
+    .. py:method:: test_end(clean_end=True)
 
         Flush results from all handlers and clean up.
 
