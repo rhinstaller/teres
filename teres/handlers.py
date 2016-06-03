@@ -26,6 +26,7 @@ import os.path
 import tempfile
 import shutil
 import teres
+import StringIO
 
 
 def _result_to_level(result):
@@ -90,7 +91,8 @@ class LoggingHandler(teres.Handler):
                     record.logfile, self.logdir + "/" + record.logname)
 
         if self.logdir is not None:
-            if isinstance(record.logfile, file):
+            if isinstance(record.logfile, file) or isinstance(
+                    record.logfile, StringIO.StringIO):
                 position = record.logfile.tell()
                 record.logfile.seek(0)
                 with open(self.logdir + "/" + record.logname, 'w') as output:
