@@ -66,13 +66,6 @@ class LoggingHandler(teres.Handler):
                  dest="/tmp/"):
         super(LoggingHandler, self).__init__(result_level, process_logs)
 
-        self.name = name
-        self.dest = dest
-        self.logdir = None
-        if dest is not None:
-            self.logdir = tempfile.mkdtemp(prefix='{}.'.format(self.name),
-                                           dir=self.dest)
-
         self.logger = logging.getLogger(name)
         self.logger.setLevel(_result_to_level(self.result_level))
 
@@ -81,6 +74,16 @@ class LoggingHandler(teres.Handler):
 
         for handler in handlers:
             self.logger.addHandler(handler)
+
+        self.name = name
+        self.dest = dest
+        self.logdir = None
+        if dest is not None:
+            self.logdir = tempfile.mkdtemp(prefix='{}.'.format(self.name),
+                                           dir=self.dest)
+            self.logger.debug(
+                "Create a directory {} to store log files.".format(
+                    self.logdir))
 
     def _emit_log(self, record):
         self.logger.log(
