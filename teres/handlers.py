@@ -70,7 +70,8 @@ class LoggingHandler(teres.Handler):
         self.dest = dest
         self.logdir = None
         if dest is not None:
-            self.logdir = tempfile.mkdtemp(prefix=self.name, dir=self.dest)
+            self.logdir = tempfile.mkdtemp(prefix='{}.'.format(self.name),
+                                           dir=self.dest)
 
         self.logger = logging.getLogger(name)
         self.logger.setLevel(_result_to_level(self.result_level))
