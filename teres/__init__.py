@@ -184,6 +184,13 @@ class Reporter(object):
 
         return Reporter._instance
 
+    @staticmethod
+    def drop_reporter():
+        """
+        Delete the Reporter singleton.
+        """
+        Reporter._instance = None
+
     def __init__(self):
         super(Reporter, self).__init__()
         self.overall_result = NONE
