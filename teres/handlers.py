@@ -87,30 +87,46 @@ class LoggingHandler(teres.Handler):
             _result_to_level(record.result), self._format_msg(record))
 
     def _emit_file(self, record):
-        if record.logname is None:
-            record.logname = os.path.basename(record.logfile).replace(' ', '_')
+        # Process files specified by path.
+        if isinstance(record.logfile, str):
+            if record.logname is None:
+                record.logname = _path_to_name(record.logfile)
 
-        if record.msg is None:
-            if self.logdir is None:
-                record.msg = 'Reporting file "{}" with name "{}".'.format(
-                    record.logfile, record.logname)
-            else:
-                record.msg = 'Copying "{}" to: "{}"'.format(
-                    record.logfile, self.logdir + "/" + record.logname)
+            msg = 'Sending file "{}" as "{}".'.format(record.logfile,
+                                                      record.logname)
 
-        if self.logdir is not None:
-            if isinstance(record.logfile, file) or isinstance(
-                    record.logfile, StringIO.StringIO):
-                position = record.logfile.tell()
-                record.logfile.seek(0)
-                with open(self.logdir + "/" + record.logname, 'w') as output:
-                    output.write(record.logfile.read())
-                record.logfile.seek(position)
-            else:
-                shutil.copy(record.logfile, self.logdir + "/" + record.logname)
+            record.logfile = open(record.logfile, 'rb')
 
-        self.logger.log(
-            _result_to_level(record.result), self._format_msg(record))
+        elif isinstance(record.logfile, file):
+            # Take care of temporary files (created by mkstemp).
+            if record.logfile.name == "<fdopen>" and record.logname is None:
+                self.logger.warning(
+                    "Logname parameter is mandatory if logfile is file like object.")
+                return
+            # Regular files without name provided.
+            elif record.logname is None:
+                record.logname = record.logfile.name
+
+            msg = 'Sending file "{}".'.format(record.logname)
+
+        elif isinstance(record.logfile, StringIO.StringIO):
+            # Take care of StringIO file like objects.
+            if record.logname is None:
+                self.logger.warning(
+                    "Logname parameter is mandatory if logfile is file like object.")
+                return
+            msg = 'Sending file "{}".'.format(record.logname)
+
+        else:
+            self.logger.error("Unable to handle this file type.")
+
+        self.logger.debug("LoggingHandler: calling _emit_file: %s as %s",
+                          record.logfile, record.logname)
+
+        with open("{}/{}".format(self.logdir, record.logname), "w") as fd:
+            shutil.copyfileobj(record.logfile, fd)
+
+        self._emit_log(teres.ReportRecord(teres.FILE, msg))
 
     def _format_msg(self, record):
         """
