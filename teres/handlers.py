@@ -46,6 +46,13 @@ def _result_to_level(result):
     return mapping[result]
 
 
+def _path_to_name(path):
+    """
+    Simple function to get nice log name.
+    """
+    return os.path.basename(path).replace(' ', '_')
+
+
 class LoggingHandler(teres.Handler):
     """
     A handler class which writes the test results to a file.
