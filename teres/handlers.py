@@ -46,6 +46,18 @@ def _result_to_level(result):
     return mapping[result]
 
 
+def _format_msg(record):
+    """
+    Method that takes care of formatting a message.
+    """
+    res = teres.result_to_name(record.result)
+    spaces = 10 - 3 - len(res)
+
+    head = ":: [   " + res + " " * spaces + "] :: "
+
+    return head + record.msg
+
+
 def _path_to_name(path):
     """
     Simple function to get nice log name.
@@ -87,7 +99,7 @@ class LoggingHandler(teres.Handler):
 
     def _emit_log(self, record):
         self.logger.log(
-            _result_to_level(record.result), self._format_msg(record))
+            _result_to_level(record.result), _format_msg(record))
 
     def _emit_file(self, record):
         # Process files specified by path.
@@ -130,17 +142,6 @@ class LoggingHandler(teres.Handler):
             shutil.copyfileobj(record.logfile, fd)
 
         self._emit_log(teres.ReportRecord(teres.FILE, msg))
-
-    def _format_msg(self, record):
-        """
-        Method that takes care of formatting a message.
-        """
-        res = teres.result_to_name(record.result)
-        spaces = 10 - 3 - len(res)
-
-        head = ":: [   " + res + " " * spaces + "] :: "
-
-        return head + record.msg
 
     def close(self):
         """
