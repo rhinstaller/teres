@@ -138,8 +138,16 @@ class LoggingHandler(teres.Handler):
         self.logger.debug("LoggingHandler: calling _emit_file: %s as %s",
                           record.logfile, record.logname)
 
-        with open("{}/{}".format(self.logdir, record.logname), "w") as fd:
-            shutil.copyfileobj(record.logfile, fd)
+        # Copy the contents.
+        position = record.logfile.tell()
+        if position:
+            record.logfile.seek(0)
+            with open("{}/{}".format(self.logdir, record.logname), "w") as fd:
+                shutil.copyfileobj(record.logfile, fd)
+            record.logfile.seek(position)
+        else:
+            with open("{}/{}".format(self.logdir, record.logname), "w") as fd:
+                shutil.copyfileobj(record.logfile, fd)
 
         self._emit_log(teres.ReportRecord(teres.FILE, msg))
 

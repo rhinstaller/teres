@@ -77,7 +77,6 @@ class LoggingHandlerTest(LoggingHandlerSetUp):
 
         src_file = tempfile.TemporaryFile()
         src_file.write(text)
-
         self.reporter.send_file(src_file, logname=test)
         src_file.close()
 
