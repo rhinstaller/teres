@@ -98,8 +98,7 @@ class LoggingHandler(teres.Handler):
                     self.logdir))
 
     def _emit_log(self, record):
-        self.logger.log(
-            _result_to_level(record.result), _format_msg(record))
+        self.logger.log(_result_to_level(record.result), _format_msg(record))
 
     def _emit_file(self, record):
         # Process files specified by path.
