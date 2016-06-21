@@ -101,6 +101,10 @@ class LoggingHandler(teres.Handler):
         self.logger.log(_result_to_level(record.result), _format_msg(record))
 
     def _emit_file(self, record):
+        if self.logdir is None:
+            self.logger.debug("Not copying, logdir is set to None.")
+            return
+
         # Process files specified by path.
         if isinstance(record.logfile, str):
             if record.logname is None:
