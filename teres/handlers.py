@@ -94,8 +94,7 @@ class LoggingHandler(teres.Handler):
             self.logdir = tempfile.mkdtemp(prefix='{}.'.format(self.name),
                                            dir=self.dest)
             self.logger.debug(
-                "Create a directory {} to store log files.".format(
-                    self.logdir))
+                "Create a directory %s to store log files.", self.logdir)
 
     def _emit_log(self, record):
         self.logger.log(_result_to_level(record.result), _format_msg(record))
