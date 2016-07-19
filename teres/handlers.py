@@ -53,9 +53,10 @@ def _format_msg(record):
     res = teres.result_to_name(record.result)
     spaces = 10 - 3 - len(res)
 
-    head = ":: [   " + res + " " * spaces + "] :: "
+    head = ":: [   " + res + " " * spaces + "] ::"
+    msg = "{} {}".format(head, record.msg)
 
-    return head + record.msg
+    return msg
 
 
 def _path_to_name(path):
