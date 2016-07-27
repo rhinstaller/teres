@@ -60,6 +60,7 @@ SUBTASK_RESULT = Flag('SUBTASK_RESULT')  # optional parameter: path
 SCORE = Flag('SCORE')  # mandatory parameter: score
 SUBTASK_LOG_FILE = Flag('SUBTASK_LOG_FILE')  # optional parameter: result url
 DEFAULT_LOG_DEST = Flag('DEFAULT_LOG_DEST')  # boolean
+QUIET_FILE = Flag('QUIET_FILE') # boolean
 
 # Define record types since we need to propagate information about the type from
 # the parent class.
@@ -330,7 +331,8 @@ class ThinBkrHandler(teres.Handler):
                      record.logfile, record.logname)
 
         self.record_queue.put((_FILE, record))
-        self._emit_log(teres.ReportRecord(teres.FILE, msg))
+        if not record.flags.get(QUIET_FILE, False):
+            self._emit_log(teres.ReportRecord(teres.FILE, msg))
 
     def _thread_emit_file(self, record):
         """
