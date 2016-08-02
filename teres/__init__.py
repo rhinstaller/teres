@@ -27,6 +27,8 @@ import sys
 import logging
 import atexit
 import traceback
+import threading
+import functools
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -62,6 +64,13 @@ def result_to_name(result):
 
     return mapping[result]
 
+
+def dumb_synchronized(method):
+    @functools.wraps(method)
+    def wrapped(self, *args, **kwargs):
+        with self._lock:
+            return method(self, *args, **kwargs)
+    return wrapped
 
 def dump_tb(tb):
     """
@@ -171,6 +180,7 @@ class Reporter(object):
     """
 
     _instance = None
+    _instance_lock = threading.RLock()
 
     @staticmethod
     def get_reporter():
@@ -178,30 +188,34 @@ class Reporter(object):
         Return an instance of this class. The instance is the same with each
         call thus cereating a singleton.
         """
-        if Reporter._instance is None:
-            logger.info("Reporter: creating new instance.")
-            Reporter._instance = Reporter()
+        with Reporter._instance_lock:
+            if Reporter._instance is None:
+                logger.info("Reporter: creating new instance.")
+                Reporter._instance = Reporter()
 
-        return Reporter._instance
+            return Reporter._instance
 
     @staticmethod
     def drop_reporter():
         """
         Delete the Reporter singleton.
         """
-        Reporter._instance = None
+        with Reporter._instance_lock:
+            Reporter._instance = None
 
     def __init__(self):
         super(Reporter, self).__init__()
         self.overall_result = NONE
         self.handlers = []
         self.finished = False
+        self._lock = threading.RLock()
 
     def __del__(self):
         logger.info("Reporter: calling __del__")
         if not self.finished:
             self.test_end()
 
+    @dumb_synchronized
     def test_end(self, clean_end=True):
         """
         Flush all results and clean up.
@@ -219,6 +233,7 @@ class Reporter(object):
 
         self.handlers = []
 
+    @dumb_synchronized
     def log(self, result, msg, flags=None):
         """
         Log a message with specific level.
@@ -227,6 +242,7 @@ class Reporter(object):
             self.overall_result = max(self.overall_result, result)
             self._log(result, msg, flags=flags)
 
+    @dumb_synchronized
     def log_error(self, msg, flags=None):
         """
         Log an ERROR message.
@@ -234,6 +250,7 @@ class Reporter(object):
         self.overall_result = max(self.overall_result, ERROR)
         self._log(ERROR, msg, flags=flags)
 
+    @dumb_synchronized
     def log_fail(self, msg, flags=None):
         """
         Log a FAIL message.
@@ -241,6 +258,7 @@ class Reporter(object):
         self.overall_result = max(self.overall_result, FAIL)
         self._log(FAIL, msg, flags=flags)
 
+    @dumb_synchronized
     def log_pass(self, msg, flags=None):
         """
         Log a PASS message.
@@ -248,18 +266,21 @@ class Reporter(object):
         self.overall_result = max(self.overall_result, PASS)
         self._log(PASS, msg, flags=flags)
 
+    @dumb_synchronized
     def log_info(self, msg, flags=None):
         """
         Log INFO message.
         """
         self._log(INFO, msg, flags=flags)
 
+    @dumb_synchronized
     def log_debug(self, msg, flags=None):
         """
         Log DEBUG message.
         """
         self._log(DEBUG, msg, flags=flags)
 
+    @dumb_synchronized
     def send_file(self, logfile, logname=None, msg=None, flags=None):
         """
         Send log file.
@@ -277,6 +298,7 @@ class Reporter(object):
 
         self.call_handlers(record)
 
+    @dumb_synchronized
     def add_handler(self, handler):
         """
         Add the specified handler to this reporter.
@@ -287,6 +309,7 @@ class Reporter(object):
         if handler not in self.handlers:
             self.handlers.append(handler)
 
+    @dumb_synchronized
     def remove_handler(self, handler):
         """
         Remove the specified handler from this reporter.
