@@ -195,22 +195,14 @@ class ThinBkrHandler(teres.Handler):
         """
         recipe = self._get_recipe()
         xml = libxml2.parseDoc(recipe.content)
-        current_taskid = None
 
         try:
             current_taskid = xml.xpathEval(
-                '/job/recipeSet/recipe/task[@status="Running"]/@id')[0].content
+                '/job/recipeSet/recipe/task[@status="Running" or @status="Waiting"]/@id')[
+                    0].content
         except IndexError:
-            logger.debug("Could not find any running task.")
-
-        if current_taskid is None:
-            try:
-                current_taskid = xml.xpathEval(
-                    '/job/recipeSet/recipe/task[@status="Waiting"]/@id')[
-                        0].content
-            except IndexError:
-                raise ThinBkrHandlerError(
-                    "Could not find any running/waiting task id.")
+            raise ThinBkrHandlerError(
+                "Could not find any running/waiting task id.")
 
         return current_taskid
 
