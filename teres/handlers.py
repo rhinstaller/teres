@@ -92,10 +92,10 @@ class LoggingHandler(teres.Handler):
         self.dest = dest
         self.logdir = None
         if dest is not None:
-            self.logdir = tempfile.mkdtemp(prefix='{}.'.format(self.name),
-                                           dir=self.dest)
-            self.logger.debug(
-                "Create a directory %s to store log files.", self.logdir)
+            self.logdir = tempfile.mkdtemp(
+                prefix='{}.'.format(self.name), dir=self.dest)
+            self.logger.debug("Create a directory %s to store log files.",
+                              self.logdir)
 
     def _emit_log(self, record):
         self.logger.log(_result_to_level(record.result), _format_msg(record))
@@ -119,7 +119,8 @@ class LoggingHandler(teres.Handler):
             # Take care of temporary files (created by mkstemp).
             if record.logfile.name == "<fdopen>" and record.logname is None:
                 self.logger.warning(
-                    "Logname parameter is mandatory if logfile is file like object.")
+                    "Logname parameter is mandatory if logfile is file like object."
+                )
                 return
             # Regular files without name provided.
             elif record.logname is None:
@@ -131,7 +132,8 @@ class LoggingHandler(teres.Handler):
             # Take care of StringIO file like objects.
             if record.logname is None:
                 self.logger.warning(
-                    "Logname parameter is mandatory if logfile is file like object.")
+                    "Logname parameter is mandatory if logfile is file like object."
+                )
                 return
             msg = 'Sending file "{}".'.format(record.logname)
 

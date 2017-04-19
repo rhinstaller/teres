@@ -158,8 +158,8 @@ class ThinBkrHandler(teres.Handler):
         self.task_log_dir = task_log_dir
 
         task_log_prefix = task_log_name + "."
-        self.task_log = tempfile.TemporaryFile(prefix=task_log_prefix,
-                                               dir=self.task_log_dir)
+        self.task_log = tempfile.TemporaryFile(
+            prefix=task_log_prefix, dir=self.task_log_dir)
 
         # Keep track whether the thread is already finished. Prepare and run the
         # thread loop.
@@ -198,8 +198,8 @@ class ThinBkrHandler(teres.Handler):
 
         try:
             current_taskid = xml.xpathEval(
-                '/job/recipeSet/recipe/task[@status="Running" or @status="Waiting"]/@id')[
-                    0].content
+                '/job/recipeSet/recipe/task[@status="Running" or @status="Waiting"]/@id'
+            )[0].content
         except IndexError:
             raise ThinBkrHandlerError(
                 "Could not find any running/waiting task id.")
@@ -311,7 +311,8 @@ class ThinBkrHandler(teres.Handler):
             # Take care of temporary files (created by mkstemp).
             if record.logfile.name == "<fdopen>" and record.logname is None:
                 logger.warning(
-                    "Logname parameter is mandatory if logfile is file like object.")
+                    "Logname parameter is mandatory if logfile is file like object."
+                )
                 return
             # Regular files without name provided.
             elif record.logname is None:
@@ -323,7 +324,8 @@ class ThinBkrHandler(teres.Handler):
             # Take care of StringIO file like objects.
             if record.logname is None:
                 logger.warning(
-                    "Logname parameter is mandatory if logfile is file like object.")
+                    "Logname parameter is mandatory if logfile is file like object."
+                )
                 return
             msg = 'Sending file "{}".'.format(record.logname)
 
@@ -368,10 +370,11 @@ class ThinBkrHandler(teres.Handler):
         Send current state of the task log file to beaker whenever this is
         called. This is meant to enable continuous updating of the task log.
         """
-        record = teres.ReportRecord(teres.FILE,
-                                    None,
-                                    logfile=self.task_log,
-                                    logname=self.task_log_name)
+        record = teres.ReportRecord(
+            teres.FILE,
+            None,
+            logfile=self.task_log,
+            logname=self.task_log_name)
 
         self._thread_emit_file(record)
 
@@ -380,14 +383,16 @@ class ThinBkrHandler(teres.Handler):
         Set handler state to finished. Join the thread for asynchronous
         communication with beaker and finally close task log.
         """
-        msg = "Test finished with the result: {}".format(teres.result_to_name(
-            self.overall_result))
+        msg = "Test finished with the result: {}".format(
+            teres.result_to_name(self.overall_result))
         self._emit_log(teres.ReportRecord(self.overall_result, msg))
 
         if self.report_overall is not None:
-            self._emit_log(teres.ReportRecord(self.overall_result,
-                                              self.report_overall,
-                                              flags={SUBTASK_RESULT: True}))
+            self._emit_log(
+                teres.ReportRecord(
+                    self.overall_result,
+                    self.report_overall,
+                    flags={SUBTASK_RESULT: True}))
 
         self.finished = True
 

@@ -70,7 +70,9 @@ def dumb_synchronized(method):
     def wrapped(self, *args, **kwargs):
         with self._lock:
             return method(self, *args, **kwargs)
+
     return wrapped
+
 
 def dump_tb(tb):
     """
@@ -286,7 +288,7 @@ class Reporter(object):
         Send log file.
         """
         logger.debug("Reporter: calling send_file(%s, %s, %s, %s)", logfile,
-                    logname, msg, flags)
+                     logname, msg, flags)
         self._log(FILE, msg=msg, logfile=logfile, logname=logname, flags=flags)
 
     def _log(self, result, msg, **kwargs):
