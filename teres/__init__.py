@@ -211,7 +211,7 @@ class Reporter(object):
         self._lock = threading.RLock()
 
     def __del__(self):
-        logger.info("Reporter: calling __del__")
+        logger.debug("Reporter: calling __del__")
         if not self.finished:
             self.test_end()
 
@@ -285,7 +285,7 @@ class Reporter(object):
         """
         Send log file.
         """
-        logger.info("Reporter: calling send_file(%s, %s, %s, %s)", logfile,
+        logger.debug("Reporter: calling send_file(%s, %s, %s, %s)", logfile,
                     logname, msg, flags)
         self._log(FILE, msg=msg, logfile=logfile, logname=logname, flags=flags)
 
