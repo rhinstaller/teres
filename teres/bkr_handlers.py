@@ -198,7 +198,7 @@ class ThinBkrHandler(teres.Handler):
 
         try:
             current_taskid = xml.xpathEval(
-                '/job/recipeSet/recipe/task[@status="Running" or @status="Waiting"]/@id'
+                '/job/recipeSet/recipe//task[@status="Running" or @status="Waiting"]/@id'
             )[0].content
         except IndexError:
             raise ThinBkrHandlerError(
