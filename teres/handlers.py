@@ -26,7 +26,7 @@ import os.path
 import tempfile
 import shutil
 import teres
-import StringIO
+import io
 
 
 def _result_to_level(result):
@@ -128,7 +128,7 @@ class LoggingHandler(teres.Handler):
 
             msg = 'Sending file "{}".'.format(record.logname)
 
-        elif isinstance(record.logfile, StringIO.StringIO):
+        elif isinstance(record.logfile, io.StringIO):
             # Take care of StringIO file like objects.
             if record.logname is None:
                 self.logger.warning(

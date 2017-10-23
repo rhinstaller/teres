@@ -115,7 +115,7 @@ def cleanup():
     """
     Cleanup method.
     """
-    import StringIO
+    import io
 
     logger.info("Reporter: calling cleanup()")
 
@@ -126,7 +126,7 @@ def cleanup():
 
     if tb is not None:
         tb_msg = repr(vl) + '\n' + "".join(traceback.format_tb(tb))
-        fo = StringIO.StringIO(tb_msg)
+        fo = io.StringIO(tb_msg)
         reporter.send_file(fo, "traceback.log")
 
         dump = dump_tb(tb)

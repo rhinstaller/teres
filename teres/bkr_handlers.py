@@ -30,8 +30,7 @@ import teres
 import threading
 import time
 import Queue
-import StringIO
-
+import io
 
 # Flags defintion
 class Flag(object):
@@ -320,7 +319,7 @@ class ThinBkrHandler(teres.Handler):
 
             msg = 'Sending file "{}".'.format(record.logname)
 
-        elif isinstance(record.logfile, StringIO.StringIO):
+        elif isinstance(record.logfile, io.StringIO):
             # Take care of StringIO file like objects.
             if record.logname is None:
                 logger.warning(

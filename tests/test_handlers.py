@@ -6,7 +6,7 @@ import teres.handlers
 import logging
 import os.path
 import shutil
-import StringIO
+import io
 import tempfile
 
 
@@ -58,7 +58,7 @@ class LoggingHandlerTest(LoggingHandlerSetUp):
         test = "test_log_stringio_file"
         text = "This is my stringio file."
 
-        src_file = StringIO.StringIO(text)
+        src_file = io.StringIO(text)
 
         self.reporter.send_file(src_file, logname=test)
 
