@@ -79,14 +79,14 @@ def dump_tb(tb):
     Routine for reporting tracebacks.
     """
     import tempfile
-    import cPickle
+    import pickle
 
     def dump_tr(obj):
         """
         Return pickleable objects or their repr().
         """
         try:
-            cPickle.dumps(obj)
+            pickle.dumps(obj)
             return obj
         except TypeError:
             return repr(obj)
@@ -105,7 +105,7 @@ def dump_tb(tb):
         tb = tb.tb_next
 
     df = tempfile.TemporaryFile()
-    cPickle.dump(dump, df)
+    pickle.dump(dump, df)
 
     return df
 
