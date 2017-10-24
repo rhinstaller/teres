@@ -99,7 +99,7 @@ def dump_tb(tb):
         entry["stack"] = traceback.format_stack(frame)[-1]
         entry["locals"] = {
             key: dump_tr(val)
-            for key, val in frame.f_locals.iteritems()
+            for key, val in frame.f_locals.items()
         }
         dump.append(entry)
         tb = tb.tb_next
