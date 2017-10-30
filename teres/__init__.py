@@ -223,7 +223,7 @@ class Reporter(object):
         Flush all results and clean up.
         """
         if self.finished:
-            return
+            return self.overall_result
 
         logger.info("Reporter: calling test_end")
         if not clean_end:
@@ -234,6 +234,7 @@ class Reporter(object):
             handler.close()
 
         self.handlers = []
+        return self.overall_result
 
     @dumb_synchronized
     def log(self, result, msg, flags=None):
