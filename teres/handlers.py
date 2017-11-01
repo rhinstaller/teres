@@ -139,6 +139,7 @@ class LoggingHandler(teres.Handler):
 
         else:
             self.logger.error("Unable to handle this file type.")
+            return
 
         self.logger.debug("LoggingHandler: calling _emit_file: %s as %s",
                           record.logfile, record.logname)

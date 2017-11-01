@@ -330,6 +330,7 @@ class ThinBkrHandler(teres.Handler):
 
         else:
             logger.error("Unable to handle this file type.")
+            return
 
         logger.debug("ThinBkrHandler: calling _emit_file: %s as %s",
                      record.logfile, record.logname)
