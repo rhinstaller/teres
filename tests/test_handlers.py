@@ -56,7 +56,7 @@ class LoggingHandlerTest(LoggingHandlerSetUp):
 
     def test_log_stringio_file(self):
         test = "test_log_stringio_file"
-        text = "This is my stringio file."
+        text = u"This is my stringio file."
 
         src_file = io.StringIO(text)
 
