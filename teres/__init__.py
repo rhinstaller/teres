@@ -29,6 +29,7 @@ import atexit
 import traceback
 import threading
 import functools
+import six
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -126,7 +127,7 @@ def cleanup():
 
     if tb is not None:
         tb_msg = repr(vl) + '\n' + "".join(traceback.format_tb(tb))
-        fo = io.StringIO(tb_msg)
+        fo = io.StringIO(six.u(tb_msg))
         reporter.send_file(fo, "traceback.log")
 
         dump = dump_tb(tb)
