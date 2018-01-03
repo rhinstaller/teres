@@ -89,7 +89,7 @@ def dump_tb(tb):
         try:
             pickle.dumps(obj)
             return obj
-        except TypeError:
+        except (TypeError, pickle.PicklingError):
             return repr(obj)
 
     dump = []
