@@ -138,7 +138,7 @@ class ThinBkrHandler(teres.Handler):
 
         # Read beaker environment variables to be able to communicate with lab
         # controller.
-        self.recipe_id = str(recipe_id) or os.environ.get("BEAKER_RECIPE_ID")
+        self.recipe_id = recipe_id and str(recipe_id) or os.environ.get("BEAKER_RECIPE_ID")
         self.lab_controller_url = lab_controller_url or os.environ.get(
             "BEAKER_LAB_CONTROLLER_URL")
 
