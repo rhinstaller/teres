@@ -30,6 +30,7 @@ import traceback
 import threading
 import functools
 import six
+import time
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -159,6 +160,7 @@ class ReportRecord(object):
                  logname=None,
                  flags=None):
         super(ReportRecord, self).__init__()
+        self.timestamp = time.time()
         self.result = result
         self.msg = msg
         self.logfile = logfile
@@ -169,6 +171,7 @@ class ReportRecord(object):
 
     def __str__(self):
         return str({
+            "timestamp": self.timestamp,
             "result": self.result,
             "msg": self.msg,
             "logfile": self.logfile,
