@@ -15,7 +15,7 @@ ENV = not bool(os.environ.get("BEAKER_RECIPE_ID") and os.environ.get("BEAKER_LAB
 @unittest.skipIf(ENV, "Beaker environment variables are not set.")
 class BkrEnv(unittest.TestCase):
     def mySetUp(self, *args, **kwargs):
-        self.reporter = teres.Reporter.get_reporter()
+        self.reporter = teres.Reporter()
 
         self.handler = teres.bkr_handlers.ThinBkrHandler(*args, **kwargs)
         self.assertIsNotNone(self.handler.recipe_id)
