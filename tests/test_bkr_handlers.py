@@ -5,12 +5,22 @@ import sys, os
 my_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, my_path + '/../')
 
+import re
 import requests
 import teres
 import teres.bkr_handlers
 import tempfile
 
 ENV = not bool(os.environ.get("BEAKER_RECIPE_ID") and os.environ.get("BEAKER_LAB_CONTROLLER_URL"))
+
+TS_REGEXP = r'[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6} '
+def prefix_ts_regexp(line):
+    if line:
+        return TS_REGEXP + re.escape(line)
+    return line
+
+def ts_regexp(text):
+    return "\n".join([prefix_ts_regexp(line) for line in text.split('\n')])
 
 @unittest.skipIf(ENV, "Beaker environment variables are not set.")
 class BkrEnv(unittest.TestCase):
@@ -23,14 +33,14 @@ class BkrEnv(unittest.TestCase):
 
         self.reporter.add_handler(self.handler)
 
-    def assertEqualLong(self, test, reference):
+    def assertMatchesLong(self, test, reference):
 
         t = test.splitlines()
         r = reference.splitlines()
 
         try:
             for i in range(max(len(t), len(r))):
-                self.assertEqual(t[i], r[i])
+                self.assertRegexpMatches(t[i], r[i])
         except IndexError:
             print()
             print()
@@ -59,17 +69,17 @@ class BkrTest(BkrEnv):
         self.reporter.test_end()
 
         # Check the results.
-        ref = """:: [   ERROR  ] :: error msg
+        ref = ts_regexp(""":: [   ERROR  ] :: error msg
 :: [   FAIL   ] :: fail msg
 :: [   PASS   ] :: pass msg
 :: [   INFO   ] :: info msg
 :: [   ERROR  ] :: Test finished with the result: ERROR
-"""
+""")
 
         url = self.handler._get_task_url() + "logs/" + test
         content = requests.get(url).content
 
-        self.assertEqualLong(content, ref)
+        self.assertMatchesLong(content, ref)
 
     def test_file_names(self):
         """
@@ -93,17 +103,17 @@ class BkrTest(BkrEnv):
         self.reporter.test_end()
 
         # Check the results.
-        ref = """:: [   FILE   ] :: Sending file "/proc/cmdline" as "cmdline".
+        ref = ts_regexp(""":: [   FILE   ] :: Sending file "/proc/cmdline" as "cmdline".
 :: [   FILE   ] :: Sending file "/proc/cpuinfo" as "custom_file_name".
 :: [   FILE   ] :: Sending file "/tmp/foo bar" as "foo_bar".
 :: [   FILE   ] :: Sending file "tmp_file".
 :: [   NONE   ] :: Test finished with the result: NONE
-"""
+""")
 
         url = self.handler._get_task_url() + "logs/" + test
         content = requests.get(url).content
 
-        self.assertEqualLong(content, ref)
+        self.assertMatchesLong(content, ref)
 
     def test_overall_result(self):
         self.mySetUp(task_log_name="test_overall_result", report_overall="Overall result")
@@ -112,14 +122,14 @@ class BkrTest(BkrEnv):
         self.reporter.test_end()
 
         # Check the results.
-        ref = """:: [   FAIL   ] :: This test has successfully failed.
+        ref = ts_regexp(""":: [   FAIL   ] :: This test has successfully failed.
 :: [   FAIL   ] :: Test finished with the result: FAIL
-:: [   FAIL   ] :: Overall result"""
+:: [   FAIL   ] :: Overall result""")
 
         url = self.handler._get_task_url() + "logs/test_overall_result"
         content = requests.get(url).content
 
-        self.assertEqualLong(content, ref)
+        self.assertMatchesLong(content, ref)
 
 if __name__ == '__main__':
     unittest.main()

@@ -31,6 +31,7 @@ import threading
 import time
 import Queue
 import io
+import datetime
 
 # Flags defintion
 class Flag(object):
@@ -94,9 +95,10 @@ def _format_msg(record):
     res = teres.result_to_name(record.result)
     spaces = 10 - 3 - len(res)
 
+    timestr = datetime.datetime.fromtimestamp(record.timestamp).strftime("%Y-%m-%d %H:%M:%S.%f ")
     head = ":: [   " + res + " " * spaces + "] :: "
 
-    return "{}{}\n".format(head, record.msg)
+    return "{}{}{}\n".format(timestr, head, record.msg)
 
 
 def _path_to_name(path):
