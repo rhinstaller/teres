@@ -387,7 +387,7 @@ class ThinBkrHandler(teres.Handler):
         logger.debug("ThinBkrHandler: calling _thread_emit_file with: %s",
                      record.logname)
 
-        req = http_put(url, payload)
+        http_put(url, payload)
 
     def reset_log_dest(self):
         """
