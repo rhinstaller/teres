@@ -32,7 +32,7 @@ import time
 import Queue
 import io
 import datetime
-from urllib import urlopen
+from urllib import urlopen, urlencode
 
 # Flags defintion
 class Flag(object):
@@ -81,6 +81,18 @@ def http_get(url):
         logger.warning("Couldn't get URL: %s", url)
         raise Exception()
     return urllib_obj.read()
+
+
+def http_post(url, data):
+    """
+    Function to simplify interaction with urllib.
+    """
+    payload = urlencode(data)
+    urllib_obj = urlopen(url, payload)
+    if urllib_obj.getcode() != 201:
+        logger.warning("Result reporting failed with code: %s", urllib_obj.getcode())
+        raise Exception()
+    return urllib_obj
 
 
 def _result_to_bkr(result):
@@ -291,13 +303,9 @@ class ThinBkrHandler(teres.Handler):
             if record.flags.get(SCORE, False):
                 data["score"] = record.flags[SCORE]
 
-            req = requests.post(url, data)
+            req = http_post(url, data)
 
-            if req.status_code != 201:
-                logger.warning("Result reporting failed with code: %s",
-                               req.status_code)
-
-            self.last_result_url = req.headers["Location"] + "/"
+            self.last_result_url = req.info().getheader("Location") + "/"
 
             if record.flags.get(DEFAULT_LOG_DEST, False):
                 self.default_log_dest = self.last_result_url
