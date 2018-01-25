@@ -106,6 +106,8 @@ def http_put(url, payload):
     if url.getcode() != 204:
         logger.warning("Uploading to %s failed with code %s", url, req.status_code)
 
+    return url
+
 
 def _result_to_bkr(result):
     """
