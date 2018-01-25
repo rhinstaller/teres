@@ -79,7 +79,6 @@ def http_get(url):
     urllib_obj = urlopen(url)
     if urllib_obj.getcode() != 200:
         logger.warning("Couldn't get URL: %s", url)
-        raise Exception()
     return urllib_obj.read()
 
 
@@ -91,7 +90,6 @@ def http_post(url, data):
     urllib_obj = urlopen(url, payload)
     if urllib_obj.getcode() != 201:
         logger.warning("Result reporting to %s failed with code: %s", url, urllib_obj.getcode())
-        raise Exception()
     return urllib_obj
 
 
