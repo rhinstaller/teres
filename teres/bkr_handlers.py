@@ -32,6 +32,7 @@ import time
 import Queue
 import io
 import datetime
+from urllib import urlopen
 
 # Flags defintion
 class Flag(object):
@@ -69,6 +70,17 @@ _FILE = object()
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+
+def http_get(url):
+    """
+    Function to simplify interaction with urllib.
+    """
+    urllib_obj = urlopen(url)
+    if urllib_obj.getcode() != 200:
+        logger.warning("Couldn't get URL: %s", url)
+        raise Exception()
+    return urllib_obj.read()
 
 
 def _result_to_bkr(result):
@@ -188,14 +200,14 @@ class ThinBkrHandler(teres.Handler):
         """
         url = self.lab_controller_url + "/recipes/" + self.recipe_id + "/"
 
-        return requests.get(url)
+        return http_get(url)
 
     def _get_running_task_id(self):
         """
         Get task id of running task.
         """
         recipe = self._get_recipe()
-        xml = libxml2.parseDoc(recipe.content)
+        xml = libxml2.parseDoc(recipe)
 
         try:
             current_taskid = xml.xpathEval(
