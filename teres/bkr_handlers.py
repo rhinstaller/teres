@@ -90,7 +90,7 @@ def http_post(url, data):
     payload = urlencode(data)
     urllib_obj = urlopen(url, payload)
     if urllib_obj.getcode() != 201:
-        logger.warning("Result reporting failed with code: %s", urllib_obj.getcode())
+        logger.warning("Result reporting to %s failed with code: %s", url, urllib_obj.getcode())
         raise Exception()
     return urllib_obj
 
