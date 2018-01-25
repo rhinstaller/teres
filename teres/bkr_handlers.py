@@ -23,7 +23,6 @@ Beaker handlers for the teres package.
 import os
 import os.path
 import tempfile
-import requests
 import libxml2
 import logging
 import teres
@@ -32,7 +31,8 @@ import time
 import Queue
 import io
 import datetime
-from urllib import urlopen, urlencode
+from urllib import urlencode
+from urllib2 import urlopen, build_opener, Request, HTTPHandler
 
 # Flags defintion
 class Flag(object):
@@ -93,6 +93,20 @@ def http_post(url, data):
         logger.warning("Result reporting failed with code: %s", urllib_obj.getcode())
         raise Exception()
     return urllib_obj
+
+
+def http_put(url, payload):
+    """
+    Function to simplify interaction with urllib.
+    """
+    opener = build_opener(HTTPHandler)
+    req = Request(url, data=payload)
+    req.add_header('Content-Type', 'text/plain')
+    req.get_method = lambda: 'PUT'
+    url = opener.open(req)
+
+    if url.getcode() != 204:
+        logger.warning("Uploading to %s failed with code %s", url, req.status_code)
 
 
 def _result_to_bkr(result):
@@ -375,10 +389,7 @@ class ThinBkrHandler(teres.Handler):
         logger.debug("ThinBkrHandler: calling _thread_emit_file with: %s",
                      record.logname)
 
-        req = requests.put(url, data=payload)
-        if req.status_code != 204:
-            logger.warning("Uploading failed with code %s", req.status_code)
-            logger.warning("Destination URL: %s", url)
+        req = http_put(url, payload)
 
     def reset_log_dest(self):
         """
