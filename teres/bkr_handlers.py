@@ -79,7 +79,8 @@ def http_get(url):
     urllib_obj = urlopen(url)
     if urllib_obj.getcode() != 200:
         logger.warning("Couldn't get URL: %s", url)
-    return urllib_obj.read()
+    else:
+        return urllib_obj.read()
 
 
 def http_post(url, data):
@@ -90,7 +91,8 @@ def http_post(url, data):
     urllib_obj = urlopen(url, payload)
     if urllib_obj.getcode() != 201:
         logger.warning("Result reporting to %s failed with code: %s", url, urllib_obj.getcode())
-    return urllib_obj
+    else:
+        return urllib_obj
 
 
 def http_put(url, payload):
@@ -105,8 +107,8 @@ def http_put(url, payload):
 
     if url.getcode() != 204:
         logger.warning("Uploading to %s failed with code %s", url, req.status_code)
-
-    return url
+    else:
+        return url
 
 
 def _result_to_bkr(result):
