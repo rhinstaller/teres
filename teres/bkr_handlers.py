@@ -28,11 +28,19 @@ import logging
 import teres
 import threading
 import time
-import Queue
 import io
 import datetime
-from urllib import urlencode
-from urllib2 import urlopen, build_opener, Request, HTTPHandler
+import functools
+import six
+
+try:
+    from urllib.parse import urlencode
+    from urllib.request import urlopen, build_opener, Request, HTTPHandler
+    from queue import Queue
+except ImportError:
+    from urllib import urlencode
+    from urllib2 import urlopen, build_opener, Request, HTTPHandler
+    from Queue import Queue
 
 # Flags defintion
 class Flag(object):
@@ -55,6 +63,9 @@ class Flag(object):
             return False
         return self.name == other.name
 
+    def __hash__(self):
+        return hash((self.name,))
+
 
 TASK_LOG_FILE = Flag('TASK_LOG_FILE')  # boolean
 SUBTASK_RESULT = Flag('SUBTASK_RESULT')  # optional parameter: path
@@ -72,6 +83,17 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
+def decoded(func):
+    functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        retval = func(*args, **kwargs)
+        if isinstance(retval, six.binary_type):
+            return retval.decode('utf8')
+        return retval
+    return wrapper
+
+
+@decoded
 def http_get(url):
     """
     Function to simplify interaction with urllib.
@@ -83,6 +105,7 @@ def http_get(url):
         return urllib_obj.read()
 
 
+@decoded
 def http_post(url, data):
     """
     Function to simplify interaction with urllib.
@@ -95,6 +118,7 @@ def http_post(url, data):
         return urllib_obj
 
 
+@decoded
 def http_put(url, payload):
     """
     Function to simplify interaction with urllib.
@@ -176,7 +200,7 @@ class ThinBkrHandler(teres.Handler):
 
         # This is a thread safe queue to pass logs and files to thread that
         # takes care of sending them to beaker.
-        self.record_queue = Queue.Queue()
+        self.record_queue = Queue()
 
         # Read beaker environment variables to be able to communicate with lab
         # controller.
