@@ -31,6 +31,12 @@ import threading
 import functools
 import six
 import time
+import io
+
+try:
+    FILE_TYPES = (file,)
+except NameError:
+    FILE_TYPES = (io.IOBase,)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -139,6 +145,15 @@ def cleanup():
     if _PID != os.getpid():
         return
     reporter.test_end(clean_end=False)
+
+
+def make_text(smth):
+    """
+    Helper function for python2&3 support.
+    """
+    if isinstance(smth, six.binary_type):
+        return smth.decode('utf8')
+    return smth
 
 
 class HandlerError(Exception):
