@@ -146,13 +146,19 @@ class LoggingHandler(teres.Handler):
 
         # Copy the contents.
         position = record.logfile.tell()
+        mode = 'w'
+        try:
+            if 'b' in record.logfile.mode:
+                mode += 'b'
+        except AttributeError:
+            pass
         if position:
             record.logfile.seek(0)
-            with open("{}/{}".format(self.logdir, record.logname), "w") as fd:
+            with open("{}/{}".format(self.logdir, record.logname), mode) as fd:
                 shutil.copyfileobj(record.logfile, fd)
             record.logfile.seek(position)
         else:
-            with open("{}/{}".format(self.logdir, record.logname), "w") as fd:
+            with open("{}/{}".format(self.logdir, record.logname), mode) as fd:
                 shutil.copyfileobj(record.logfile, fd)
 
         self._emit_log(teres.ReportRecord(teres.FILE, msg))
