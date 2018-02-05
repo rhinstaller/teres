@@ -37,10 +37,12 @@ try:
     from urllib.parse import urlencode
     from urllib.request import urlopen, build_opener, Request, HTTPHandler
     from queue import Queue
+    from queue import Empty as QueueEmpty
 except ImportError:
     from urllib import urlencode
     from urllib2 import urlopen, build_opener, Request, HTTPHandler
     from Queue import Queue
+    from Queue import Empty as QueueEmpty
 
 # Flags defintion
 class Flag(object):
@@ -479,7 +481,7 @@ class ThinBkrHandler(teres.Handler):
                 elif record_type == _FILE:
                     self._thread_emit_file(record)
 
-            except Queue.Empty:
+            except QueueEmpty:
                 pass
 
             if not synced and (time.time() - last_update > self.flush_delay):
