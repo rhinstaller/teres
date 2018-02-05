@@ -457,6 +457,10 @@ class ThinBkrHandler(teres.Handler):
 
             except Queue.Empty:
                 pass
+            except Exception as e:
+                with open('/tmp/teres-tracebacks', 'a') as tb_file:
+                    tb_file.write(str(e))
+                    tb_file.write('\n')
 
             if not synced and (time.time() - last_update > self.flush_delay):
                 self._thread_flush()
