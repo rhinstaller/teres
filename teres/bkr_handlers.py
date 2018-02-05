@@ -379,9 +379,10 @@ class ThinBkrHandler(teres.Handler):
 
             record.logfile = open(record.logfile, 'rb')
 
-        elif isinstance(record.logfile, file):
+        elif isinstance(record.logfile, teres.FILE_TYPES):
             # Take care of temporary files (created by mkstemp).
-            if record.logfile.name == "<fdopen>" and record.logname is None:
+            if (record.logfile.name == "<fdopen>" or isinstance(
+                    record.logfile.name, int)) and record.logname is None:
                 logger.warning(
                     "Logname parameter is mandatory if logfile is file like object."
                 )
