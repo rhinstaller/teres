@@ -88,10 +88,7 @@ logger.addHandler(logging.NullHandler())
 def decoded(func):
     functools.wraps(func)
     def wrapper(*args, **kwargs):
-        retval = func(*args, **kwargs)
-        if isinstance(retval, six.binary_type):
-            return retval.decode('utf8')
-        return retval
+        return teres.make_text(func(*args, **kwargs))
     return wrapper
 
 
@@ -113,7 +110,7 @@ def http_post(url, data):
     Function to simplify interaction with urllib.
     """
     payload = urlencode(data)
-    urllib_obj = urlopen(url, payload)
+    urllib_obj = urlopen(url, six.b(payload))
     if urllib_obj.getcode() != 201:
         logger.warning("Result reporting to %s failed with code: %s", url, urllib_obj.getcode())
     else:
@@ -326,7 +323,7 @@ class ThinBkrHandler(teres.Handler):
         Send log record to beaker.
         """
         # Without any flags specified just write the message into the log file.
-        self.task_log.write(_format_msg(record))
+        self.task_log.write(six.b(_format_msg(record)))
         logger.debug("ThinBkrHandler: calling _thread_emit_log with record %s",
                      record)
 
