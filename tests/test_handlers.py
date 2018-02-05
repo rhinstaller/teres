@@ -8,6 +8,7 @@ import os.path
 import shutil
 import io
 import tempfile
+import six
 
 
 class LoggingHandlerSetUp(unittest.TestCase):
@@ -76,7 +77,7 @@ class LoggingHandlerTest(LoggingHandlerSetUp):
         text = "This is my temporary file."
 
         src_file = tempfile.TemporaryFile()
-        src_file.write(text)
+        src_file.write(six.b(text))
         self.reporter.send_file(src_file, logname=test)
         src_file.close()
 

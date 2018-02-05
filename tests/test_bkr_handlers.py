@@ -10,6 +10,7 @@ import requests
 import teres
 import teres.bkr_handlers
 import tempfile
+import six
 
 ENV = not bool(os.environ.get("BEAKER_RECIPE_ID") and os.environ.get("BEAKER_LAB_CONTROLLER_URL"))
 
@@ -40,7 +41,7 @@ class BkrEnv(unittest.TestCase):
 
         try:
             for i in range(max(len(t), len(r))):
-                self.assertRegexpMatches(t[i], r[i])
+                self.assertRegexpMatches(teres.make_text(t[i]), r[i])
         except IndexError:
             print()
             print()
@@ -96,7 +97,7 @@ class BkrTest(BkrEnv):
         self.reporter.send_file('/tmp/foo bar')
 
         tmp = tempfile.TemporaryFile()
-        tmp.write("I'm a temporary file.")
+        tmp.write(six.b("I'm a temporary file."))
         self.reporter.send_file(tmp)
         self.reporter.send_file(tmp, logname="tmp_file")
 
