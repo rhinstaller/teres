@@ -175,11 +175,12 @@ def _get_location_header(smth):
     """
     Python 2 and 3 helper function.
     """
-    location = ""
     try:
-        location = smth.getheader("Location") + "/"
+        # python3
+        return smth.getheader("Location") + "/"
     except AttributeError:
-        location = smth.info().getheader("Location") + "/"
+        # python2
+        return smth.info().getheader("Location") + "/"
 
     return smth
 
