@@ -171,6 +171,18 @@ def _path_to_name(path):
     return os.path.basename(path).replace(' ', '_')
 
 
+def _get_location_header(smth):
+    """
+    Python 2 and 3 helper function.
+    """
+    location = ""
+    try:
+        location = smth.getheader("Location") + "/"
+    except AttributeError:
+        location = smth.info().getheader("Location") + "/"
+
+    return smth
+
 class ThinBkrHandlerError(teres.HandlerError):
     """
     Exception for beaker handler module.
@@ -344,7 +356,7 @@ class ThinBkrHandler(teres.Handler):
 
             req = http_post(url, data)
 
-            self.last_result_url = req.info().getheader("Location") + "/"
+            self.last_result_url = _get_location_header(req)
 
             if record.flags.get(DEFAULT_LOG_DEST, False):
                 self.default_log_dest = self.last_result_url
