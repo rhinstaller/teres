@@ -17,19 +17,19 @@ class LoggingHandlerSetUp(unittest.TestCase):
 
         self.logger = logging.getLogger("test.logger")
         self.loghan_path = "/tmp/logging_handler_test.log"
-        self.loghan = logging.FileHandler(self.loghan_path,
-                                          mode='w')
+        self.loghan = logging.FileHandler(self.loghan_path, mode='w')
         self.loghan.setLevel(logging.DEBUG)
         self.logger.addHandler(self.loghan)
 
-        self.handler = teres.handlers.LoggingHandler("logginghandler.test",
-                                                     self.logger,
-                                                     dest="/tmp/")
+        self.handler = teres.handlers.LoggingHandler(
+            "logginghandler.test", self.logger, dest="/tmp/")
 
         self.reporter.add_handler(self.handler)
 
     def tearDown(self):
         teres.Reporter.drop_reporter()
+
+
 #        shutil.rmtree(self.handler.logdir)
 
 

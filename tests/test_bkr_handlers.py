@@ -12,16 +12,22 @@ import teres.bkr_handlers
 import tempfile
 import six
 
-ENV = not bool(os.environ.get("BEAKER_RECIPE_ID") and os.environ.get("BEAKER_LAB_CONTROLLER_URL"))
+ENV = not bool(
+    os.environ.get("BEAKER_RECIPE_ID")
+    and os.environ.get("BEAKER_LAB_CONTROLLER_URL"))
 
 TS_REGEXP = r'[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6} '
+
+
 def prefix_ts_regexp(line):
     if line:
         return TS_REGEXP + re.escape(line)
     return line
 
+
 def ts_regexp(text):
     return "\n".join([prefix_ts_regexp(line) for line in text.split('\n')])
+
 
 @unittest.skipIf(ENV, "Beaker environment variables are not set.")
 class BkrEnv(unittest.TestCase):
@@ -50,7 +56,8 @@ class BkrEnv(unittest.TestCase):
             print("Reference string:\n{}".format(reference))
             print()
 
-            self.fail("Test string and reference string are of different length.")
+            self.fail(
+                "Test string and reference string are of different length.")
 
 
 class BkrTest(BkrEnv):
@@ -104,7 +111,8 @@ class BkrTest(BkrEnv):
         self.reporter.test_end()
 
         # Check the results.
-        ref = ts_regexp(""":: [   FILE   ] :: Sending file "/proc/cmdline" as "cmdline".
+        ref = ts_regexp(
+            """:: [   FILE   ] :: Sending file "/proc/cmdline" as "cmdline".
 :: [   FILE   ] :: Sending file "/proc/cpuinfo" as "custom_file_name".
 :: [   FILE   ] :: Sending file "/tmp/foo bar" as "foo_bar".
 :: [   FILE   ] :: Sending file "tmp_file".
@@ -117,13 +125,16 @@ class BkrTest(BkrEnv):
         self.assertMatchesLong(content, ref)
 
     def test_overall_result(self):
-        self.mySetUp(task_log_name="test_overall_result", report_overall="Overall result")
+        self.mySetUp(
+            task_log_name="test_overall_result",
+            report_overall="Overall result")
 
         self.reporter.log_fail("This test has successfully failed.")
         self.reporter.test_end()
 
         # Check the results.
-        ref = ts_regexp(""":: [   FAIL   ] :: This test has successfully failed.
+        ref = ts_regexp(
+            """:: [   FAIL   ] :: This test has successfully failed.
 :: [   FAIL   ] :: Test finished with the result: FAIL
 :: [   FAIL   ] :: Overall result""")
 
@@ -131,6 +142,7 @@ class BkrTest(BkrEnv):
         content = requests.get(url).content
 
         self.assertMatchesLong(content, ref)
+
 
 if __name__ == '__main__':
     unittest.main()

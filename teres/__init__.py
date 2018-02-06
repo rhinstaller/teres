@@ -34,9 +34,9 @@ import time
 import io
 
 try:
-    FILE_TYPES = (file,)
+    FILE_TYPES = (file, )
 except NameError:
-    FILE_TYPES = (io.IOBase,)
+    FILE_TYPES = (io.IOBase, )
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -139,6 +139,7 @@ def cleanup():
 
         dump = dump_tb(tb)
         reporter.send_file(dump, "traceback.dump")
+
 
 # when somebody uses fork() and the process ends, don't do anything,
 # since this is handled by parent process

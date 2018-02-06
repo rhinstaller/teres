@@ -44,6 +44,7 @@ except ImportError:
     from Queue import Queue
     from Queue import Empty as QueueEmpty
 
+
 # Flags defintion
 class Flag(object):
     """
@@ -66,7 +67,7 @@ class Flag(object):
         return self.name == other.name
 
     def __hash__(self):
-        return hash((self.name,))
+        return hash((self.name, ))
 
 
 TASK_LOG_FILE = Flag('TASK_LOG_FILE')  # boolean
@@ -87,8 +88,10 @@ logger.addHandler(logging.NullHandler())
 
 def decoded(func):
     functools.wraps(func)
+
     def wrapper(*args, **kwargs):
         return teres.make_text(func(*args, **kwargs))
+
     return wrapper
 
 
@@ -112,7 +115,8 @@ def http_post(url, data):
     payload = urlencode(data)
     urllib_obj = urlopen(url, six.b(payload))
     if urllib_obj.getcode() != 201:
-        logger.warning("Result reporting to %s failed with code: %s", url, urllib_obj.getcode())
+        logger.warning("Result reporting to %s failed with code: %s", url,
+                       urllib_obj.getcode())
     else:
         return urllib_obj
 
@@ -129,7 +133,8 @@ def http_put(url, payload):
     url = opener.open(req)
 
     if url.getcode() != 204:
-        logger.warning("Uploading to %s failed with code %s", url, req.status_code)
+        logger.warning("Uploading to %s failed with code %s", url,
+                       req.status_code)
     else:
         return url
 
@@ -158,7 +163,8 @@ def _format_msg(record):
     res = teres.result_to_name(record.result)
     spaces = 10 - 3 - len(res)
 
-    timestr = datetime.datetime.fromtimestamp(record.timestamp).strftime("%Y-%m-%d %H:%M:%S.%f ")
+    timestr = datetime.datetime.fromtimestamp(
+        record.timestamp).strftime("%Y-%m-%d %H:%M:%S.%f ")
     head = ":: [   " + res + " " * spaces + "] :: "
 
     return "{}{}{}\n".format(timestr, head, record.msg)
@@ -183,6 +189,7 @@ def _get_location_header(smth):
         return smth.info().getheader("Location") + "/"
 
     return smth
+
 
 class ThinBkrHandlerError(teres.HandlerError):
     """
@@ -216,7 +223,8 @@ class ThinBkrHandler(teres.Handler):
 
         # Read beaker environment variables to be able to communicate with lab
         # controller.
-        self.recipe_id = recipe_id and str(recipe_id) or os.environ.get("BEAKER_RECIPE_ID")
+        self.recipe_id = recipe_id and str(recipe_id) or os.environ.get(
+            "BEAKER_RECIPE_ID")
         self.lab_controller_url = lab_controller_url or os.environ.get(
             "BEAKER_LAB_CONTROLLER_URL")
 
@@ -313,8 +321,7 @@ class ThinBkrHandler(teres.Handler):
         if send_log and has_logfile and to_subtask:
 
             if isinstance(to_subtask, str):
-                return record.flags[
-                    SUBTASK_LOG_FILE] + "logs/" + record.logname + "/"
+                return record.flags[SUBTASK_LOG_FILE] + "logs/" + record.logname + "/"
             else:
                 return self.last_result_url + "logs/" + record.logname + "/"
 
@@ -464,7 +471,9 @@ class ThinBkrHandler(teres.Handler):
                 teres.ReportRecord(
                     self.overall_result,
                     self.report_overall,
-                    flags={SUBTASK_RESULT: True}))
+                    flags={
+                        SUBTASK_RESULT: True
+                    }))
 
         self.finished = True
 
