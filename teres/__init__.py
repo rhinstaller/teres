@@ -156,6 +156,15 @@ def make_text(smth):
     return smth
 
 
+def make_bytes(smth):
+    """
+    Helper function for python2&3 support.
+    """
+    if isinstance(smth, six.text_type):
+        return smth.encode('utf8')
+    return smth
+
+
 class HandlerError(Exception):
     """
     Generic exception for handlers.

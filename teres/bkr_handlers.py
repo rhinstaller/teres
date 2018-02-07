@@ -110,7 +110,7 @@ def http_post(url, data):
     Function to simplify interaction with urllib.
     """
     payload = urlencode(data)
-    urllib_obj = urlopen(url, six.b(payload))
+    urllib_obj = urlopen(url, teres.make_bytes(payload))
     if urllib_obj.getcode() != 201:
         logger.warning("Result reporting to %s failed with code: %s", url, urllib_obj.getcode())
     else:
@@ -123,7 +123,7 @@ def http_put(url, payload):
     Function to simplify interaction with urllib.
     """
     opener = build_opener(HTTPHandler)
-    req = Request(url, data=payload)
+    req = Request(url, data=teres.make_bytes(payload))
     req.add_header('Content-Type', 'text/plain')
     req.get_method = lambda: 'PUT'
     url = opener.open(req)
@@ -336,7 +336,7 @@ class ThinBkrHandler(teres.Handler):
         Send log record to beaker.
         """
         # Without any flags specified just write the message into the log file.
-        self.task_log.write(six.b(_format_msg(record)))
+        self.task_log.write(teres.make_bytes(_format_msg(record)))
         logger.debug("ThinBkrHandler: calling _thread_emit_log with record %s",
                      record)
 
