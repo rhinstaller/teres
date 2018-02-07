@@ -380,6 +380,15 @@ class ThinBkrHandler(teres.Handler):
 
             record.logfile = open(record.logfile, 'rb')
 
+        elif isinstance(record.logfile, io.StringIO):
+            # Take care of StringIO file like objects.
+            if record.logname is None:
+                logger.warning(
+                    "Logname parameter is mandatory if logfile is file like object."
+                )
+                return
+            msg = 'Sending file "{}".'.format(record.logname)
+
         elif isinstance(record.logfile, teres.FILE_TYPES):
             # Take care of temporary files (created by mkstemp).
             if (record.logfile.name == "<fdopen>" or isinstance(
@@ -392,15 +401,6 @@ class ThinBkrHandler(teres.Handler):
             elif record.logname is None:
                 record.logname = record.logfile.name
 
-            msg = 'Sending file "{}".'.format(record.logname)
-
-        elif isinstance(record.logfile, io.StringIO):
-            # Take care of StringIO file like objects.
-            if record.logname is None:
-                logger.warning(
-                    "Logname parameter is mandatory if logfile is file like object."
-                )
-                return
             msg = 'Sending file "{}".'.format(record.logname)
 
         else:
