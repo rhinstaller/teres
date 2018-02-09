@@ -495,7 +495,7 @@ class ThinBkrHandler(teres.Handler):
             except QueueEmpty:
                 pass
 
-            if not synced and (time.time() - last_update > self.flush_delay):
+            if not synced and not (0 < time.time() - last_update < self.flush_delay):
                 self._thread_flush()
                 synced = True
                 last_update = time.time()
