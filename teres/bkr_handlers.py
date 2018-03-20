@@ -35,12 +35,12 @@ import six
 
 try:
     from urllib.parse import urlencode
-    from urllib.request import urlopen, build_opener, Request, HTTPHandler
+    from urllib.request import urlopen, build_opener, Request, HTTPHandler, HTTPError
     from queue import Queue
     from queue import Empty as QueueEmpty
 except ImportError:
     from urllib import urlencode
-    from urllib2 import urlopen, build_opener, Request, HTTPHandler
+    from urllib2 import urlopen, build_opener, Request, HTTPHandler, HTTPError
     from Queue import Queue
     from Queue import Empty as QueueEmpty
 
@@ -97,12 +97,14 @@ def http_get(url):
     """
     Function to simplify interaction with urllib.
     """
-    urllib_obj = urlopen(url)
-    if urllib_obj.getcode() != 200:
+    try:
+        urllib_obj = urlopen(url)
+        if urllib_obj.getcode() != 200:
+            logger.warning("Couldn't get URL: %s", url)
+        else:
+            return urllib_obj.read()
+    except HTTPError:
         logger.warning("Couldn't get URL: %s", url)
-    else:
-        return urllib_obj.read()
-
 
 @decoded
 def http_post(url, data):
