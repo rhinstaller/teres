@@ -23,7 +23,7 @@ Beaker handlers for the teres package.
 import os
 import os.path
 import tempfile
-import libxml2
+import xml.etree.ElementTree
 import logging
 import teres
 import threading
@@ -271,17 +271,15 @@ class ThinBkrHandler(teres.Handler):
         Get task id of running task.
         """
         recipe = self._get_recipe()
-        xml = libxml2.parseDoc(recipe)
+        doc = xml.etree.ElementTree.fromstring(recipe)
 
         try:
-            current_taskid = xml.xpathEval(
-                '/job/recipeSet/recipe//task[@status="Running" or @status="Waiting"]/@id'
-            )[0].content
+            for task in doc.findall('./recipeSet/recipe//task'):
+                if task.attrib['status'] in ("Running", "Waiting"):
+                    return task.attrib['id']
         except IndexError:
             raise ThinBkrHandlerError(
                 "Could not find any running/waiting task id.")
-
-        return current_taskid
 
     def _get_task_url(self):
         """Get current task url"""
