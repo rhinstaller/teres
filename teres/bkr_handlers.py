@@ -484,14 +484,20 @@ class ThinBkrHandler(teres.Handler):
             try:
                 record_type, record = self.record_queue.get(timeout=0.1)
 
+                logger.debug("THREAD(%s) start _thread_emit_*", threading.currentThread().ident)
                 if record_type == _LOG:
+                    logger.debug("THREAD(%s) _thread_emit_log", threading.currentThread().ident)
                     self._thread_emit_log(record)
                     synced = False
                 elif record_type == _FILE:
+                    logger.debug("THREAD(%s) _thread_emit_file", threading.currentThread().ident)
                     self._thread_emit_file(record)
+                logger.debug("THREAD(%s) end _thread_emit_*", threading.currentThread().ident)
 
             except QueueEmpty:
                 pass
+            except Exception as e:
+                logger.error("THREAD(%s) exception: %s", e)
 
             if not synced and not (0 < time.time() - last_update < self.flush_delay):
                 self._thread_flush()
