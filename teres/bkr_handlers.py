@@ -32,6 +32,7 @@ import io
 import datetime
 import functools
 import six
+import socket
 
 try:
     from urllib.parse import urlencode
@@ -81,6 +82,10 @@ QUIET_FILE = Flag('QUIET_FILE')  # boolean
 _LOG = object()
 _FILE = object()
 
+# Constants
+HTTP_TIMEOUT = 30
+HTTP_RETRIES = 3
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
@@ -97,7 +102,15 @@ def http_get(url):
     """
     Function to simplify interaction with urllib.
     """
-    urllib_obj = urlopen(url)
+    for i in range(HTTP_RETRIES):
+        try:
+            urllib_obj = urlopen(url, timeout=HTTP_TIMEOUT)
+            break
+        except socket.timeout:
+            logger.error(
+                "(%d/%d) http_get hit timeout on URL: %s",
+                i, HTTP_RETRIES, url
+            )
     if urllib_obj.getcode() != 200:
         logger.warning("Couldn't get URL: %s", url)
     else:
@@ -110,7 +123,15 @@ def http_post(url, data):
     Function to simplify interaction with urllib.
     """
     payload = urlencode(data)
-    urllib_obj = urlopen(url, teres.make_bytes(payload))
+    for i in range(HTTP_RETRIES):
+        try:
+            urllib_obj = urlopen(url, teres.make_bytes(payload), timeout=HTTP_TIMEOUT)
+            break
+        except socket.timeout:
+            logger.error(
+                "(%d/%d) http_post hit timeout on URL: %s",
+                i, HTTP_RETRIES, url
+            )
     if urllib_obj.getcode() != 201:
         logger.warning("Result reporting to %s failed with code: %s", url, urllib_obj.getcode())
     else:
@@ -126,7 +147,15 @@ def http_put(url, payload):
     req = Request(url, data=teres.make_bytes(payload))
     req.add_header('Content-Type', 'text/plain')
     req.get_method = lambda: 'PUT'
-    url = opener.open(req)
+    for i in range(HTTP_RETRIES):
+        try:
+            url = opener.open(req, timeout=HTTP_TIMEOUT)
+            break
+        except socket.timeout:
+            logger.error(
+                "(%d/%d) http_put hit timeout on URL: %s",
+                i, HTTP_RETRIES, url
+            )
 
     if url.getcode() != 204:
         logger.warning("Uploading to %s failed with code %s", url, req.status_code)
