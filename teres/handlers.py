@@ -21,12 +21,16 @@ Handlers for the teres package.
 """
 
 import logging
-import collections
 import os.path
 import tempfile
 import shutil
 import teres
 import io
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 
 def _result_to_level(result):
@@ -82,7 +86,7 @@ class LoggingHandler(teres.Handler):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(_result_to_level(self.result_level))
 
-        if not isinstance(handlers, collections.Iterable):
+        if not isinstance(handlers, Iterable):
             handlers = [handlers]
 
         for handler in handlers:
