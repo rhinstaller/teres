@@ -139,13 +139,15 @@ def http_post(url, data):
 
 
 @decoded
-def http_put(url, payload):
+def http_put(url, payload, **headers):
     """
     Function to simplify interaction with urllib.
     """
     opener = build_opener(HTTPHandler)
     req = Request(url, data=teres.make_bytes(payload))
     req.add_header('Content-Type', 'text/plain')
+    for header, value in headers:
+        req.add_header(header, value)
     req.get_method = lambda: 'PUT'
     for i in range(HTTP_RETRIES):
         try:
@@ -441,21 +443,27 @@ class ThinBkrHandler(teres.Handler):
         if not record.flags.get(QUIET_FILE, False):
             self._emit_log(teres.ReportRecord(teres.FILE, msg))
 
-    def _thread_emit_file(self, record):
+    def _thread_emit_file(self, record, offset=0):
         """
         Send file record to beaker.
         """
         url = self._generate_url(record)
 
         position = record.logfile.tell()
-        record.logfile.seek(0)
+        record.logfile.seek(offset)
         payload = record.logfile.read()
         record.logfile.seek(position)
 
         logger.debug("ThinBkrHandler: calling _thread_emit_file with: %s",
                      record.logname)
 
-        http_put(url, payload)
+        headers = {}
+        if offset:
+            length = len(payload)
+            headers['Content-Range'] = 'bytes %d-%d/%d' % (
+                offset, offset+length, length,
+            )
+        http_put(url, payload, **headers)
 
     def reset_log_dest(self):
         """
