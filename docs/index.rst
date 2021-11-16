@@ -89,7 +89,7 @@ actual reporting.
         Report a log file. The *logfile* argument can be a path to a log file
         stored on the filesystem or a file like object. In case of file like
         object is passed the read permissions are mandatory. The *logname*
-        arguments provides custom log name.
+        argument provides custom log name.
 
     .. py:method:: test_end(clean_end=True)
 
