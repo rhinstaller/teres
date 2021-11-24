@@ -138,7 +138,7 @@ def http_put(url, payload, **headers):
     opener = build_opener(HTTPHandler)
     req = Request(url, data=teres.make_bytes(payload))
     req.add_header('Content-Type', 'text/plain')
-    for header, value in headers:
+    for header, value in headers.items():
         req.add_header(header, value)
     req.get_method = lambda: 'PUT'
     for i in range(HTTP_RETRIES):
