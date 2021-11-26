@@ -500,15 +500,15 @@ class ThinBkrHandler(teres.Handler):
             try:
                 record_type, record = self.record_queue.get(timeout=0.1)
 
-                logger.debug("THREAD(%s) start _thread_emit_*", threading.currentThread().ident)
+                logger.debug("THREAD(%s) start _thread_emit_*", threading.current_thread().ident)
                 if record_type == _LOG:
-                    logger.debug("THREAD(%s) _thread_emit_log", threading.currentThread().ident)
+                    logger.debug("THREAD(%s) _thread_emit_log", threading.current_thread().ident)
                     self._thread_emit_log(record)
                     synced = False
                 elif record_type == _FILE:
-                    logger.debug("THREAD(%s) _thread_emit_file", threading.currentThread().ident)
+                    logger.debug("THREAD(%s) _thread_emit_file", threading.current_thread().ident)
                     self._thread_emit_file(record)
-                logger.debug("THREAD(%s) end _thread_emit_*", threading.currentThread().ident)
+                logger.debug("THREAD(%s) end _thread_emit_*", threading.current_thread().ident)
 
             except QueueEmpty:
                 pass
