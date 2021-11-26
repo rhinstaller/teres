@@ -96,7 +96,7 @@ class BkrTest(BkrEnv):
         self.reporter.send_file('/tmp/foo bar')
 
         tmp = tempfile.TemporaryFile()
-        tmp.write("I'm a temporary file.".encode('latin-1'))
+        tmp.write("I'm a temporary file.".encode())
         self.reporter.send_file(tmp)
         self.reporter.send_file(tmp, logname="tmp_file")
 

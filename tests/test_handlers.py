@@ -76,7 +76,7 @@ class LoggingHandlerTest(LoggingHandlerSetUp):
         text = "This is my temporary file."
 
         src_file = tempfile.TemporaryFile()
-        src_file.write(text.encode('latin-1'))
+        src_file.write(text.encode())
         self.reporter.send_file(src_file, logname=test)
         src_file.close()
 
