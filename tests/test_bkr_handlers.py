@@ -10,7 +10,6 @@ import requests
 import teres
 import teres.bkr_handlers
 import tempfile
-import six
 
 ENV = not bool(os.environ.get("BEAKER_RECIPE_ID") and os.environ.get("BEAKER_LAB_CONTROLLER_URL"))
 
@@ -97,7 +96,7 @@ class BkrTest(BkrEnv):
         self.reporter.send_file('/tmp/foo bar')
 
         tmp = tempfile.TemporaryFile()
-        tmp.write(six.b("I'm a temporary file."))
+        tmp.write("I'm a temporary file.".encode('latin-1'))
         self.reporter.send_file(tmp)
         self.reporter.send_file(tmp, logname="tmp_file")
 

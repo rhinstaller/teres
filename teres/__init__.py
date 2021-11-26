@@ -29,7 +29,6 @@ import atexit
 import traceback
 import threading
 import functools
-import six
 import time
 import io
 
@@ -131,7 +130,7 @@ def cleanup():
 
     if tb is not None:
         tb_msg = repr(vl) + '\n' + "".join(traceback.format_tb(tb))
-        fo = io.StringIO(six.u(tb_msg))
+        fo = io.StringIO(tb_msg)
         reporter.send_file(fo, "traceback.log")
 
         dump = dump_tb(tb)
@@ -148,7 +147,7 @@ def make_text(smth):
     """
     Helper function to coerce UTF-8 bytes into str
     """
-    if isinstance(smth, six.binary_type):
+    if isinstance(smth, bytes):
         return smth.decode('utf8')
     return smth
 
@@ -157,7 +156,7 @@ def make_bytes(smth):
     """
     Helper function to coerce str into UTF-8 bytes
     """
-    if isinstance(smth, six.text_type):
+    if isinstance(smth, str):
         return smth.encode('utf8')
     return smth
 

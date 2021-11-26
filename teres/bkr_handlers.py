@@ -31,7 +31,6 @@ import time
 import io
 import datetime
 import functools
-import six
 import socket
 from urllib.parse import urlencode
 from urllib.request import urlopen, build_opener, Request, HTTPHandler
