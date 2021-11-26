@@ -146,7 +146,7 @@ def cleanup():
 
 def make_text(smth):
     """
-    Helper function for python2&3 support.
+    Helper function to coerce UTF-8 bytes into str
     """
     if isinstance(smth, six.binary_type):
         return smth.decode('utf8')
@@ -155,7 +155,7 @@ def make_text(smth):
 
 def make_bytes(smth):
     """
-    Helper function for python2&3 support.
+    Helper function to coerce str into UTF-8 bytes
     """
     if isinstance(smth, six.text_type):
         return smth.encode('utf8')
