@@ -33,17 +33,10 @@ import datetime
 import functools
 import six
 import socket
-
-try:
-    from urllib.parse import urlencode
-    from urllib.request import urlopen, build_opener, Request, HTTPHandler
-    from queue import Queue
-    from queue import Empty as QueueEmpty
-except ImportError:
-    from urllib import urlencode
-    from urllib2 import urlopen, build_opener, Request, HTTPHandler
-    from Queue import Queue
-    from Queue import Empty as QueueEmpty
+from urllib.parse import urlencode
+from urllib.request import urlopen, build_opener, Request, HTTPHandler
+from queue import Queue
+from queue import Empty as QueueEmpty
 
 # Flags defintion
 class Flag(object):
