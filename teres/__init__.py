@@ -33,10 +33,7 @@ import six
 import time
 import io
 
-try:
-    FILE_TYPES = (file,)
-except NameError:
-    FILE_TYPES = (io.IOBase,)
+FILE_TYPES = (io.IOBase,)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
