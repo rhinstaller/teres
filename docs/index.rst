@@ -189,6 +189,9 @@ during the initialization.
       by `TASK_LOG_FILE` and `SUBTASK_LOG_FILE` flags and the default
       destination can be changed by using this flag again.
       :py:class:`teres.Reporter`
+    - `REUPLOAD` - This boolean flag indicates that file should be re-uploaded
+      even if handler's internal tracking suggests that part of the file might
+      already be uploaded. :py:meth:`teres.Reporter.send_file()`
 
 .. py:method:: _emit_file(record)
 
