@@ -135,6 +135,10 @@ def http_put(url, payload, **headers):
     """
     Function to simplify interaction with urllib.
     """
+    logger.debug('http_put(): url=%r' % url)
+    logger.debug('http_put(): len(payload)=%r, payload[0:20]=%r)'
+                 % (len(payload), payload[0:20]))
+    logger.debug('http_put(): headers=%r' % headers)
     opener = build_opener(HTTPHandler)
     req = Request(url, data=teres.make_bytes(payload))
     req.add_header('Content-Type', 'text/plain')
