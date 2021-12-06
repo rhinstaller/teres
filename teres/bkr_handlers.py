@@ -426,27 +426,21 @@ class ThinBkrHandler(teres.Handler):
         if not record.flags.get(QUIET_FILE, False):
             self._emit_log(teres.ReportRecord(teres.FILE, msg))
 
-    def _thread_emit_file(self, record, offset=0):
+    def _thread_emit_file(self, record):
         """
         Send file record to beaker.
         """
         url = self._generate_url(record)
 
         position = record.logfile.tell()
-        record.logfile.seek(offset)
+        record.logfile.seek(0)
         payload = record.logfile.read()
         record.logfile.seek(position)
 
         logger.debug("ThinBkrHandler: calling _thread_emit_file with: %s",
                      record.logname)
 
-        headers = {}
-        if offset:
-            length = len(payload)
-            headers['Content-Range'] = 'bytes %d-%d/%d' % (
-                offset, offset+length, length,
-            )
-        http_put(url, payload, **headers)
+        http_put(url, payload)
 
     def reset_log_dest(self):
         """
