@@ -27,10 +27,7 @@ import shutil
 import teres
 import io
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 
 def _result_to_level(result):

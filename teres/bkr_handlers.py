@@ -31,19 +31,11 @@ import time
 import io
 import datetime
 import functools
-import six
 import socket
-
-try:
-    from urllib.parse import urlencode
-    from urllib.request import urlopen, build_opener, Request, HTTPHandler
-    from queue import Queue
-    from queue import Empty as QueueEmpty
-except ImportError:
-    from urllib import urlencode
-    from urllib2 import urlopen, build_opener, Request, HTTPHandler
-    from Queue import Queue
-    from Queue import Empty as QueueEmpty
+from urllib.parse import urlencode
+from urllib.request import urlopen, build_opener, Request, HTTPHandler
+from queue import Queue
+from queue import Empty as QueueEmpty
 
 # Flags defintion
 class Flag(object):
@@ -201,19 +193,6 @@ def _path_to_name(path):
     """
     return os.path.basename(path).replace(' ', '_')
 
-
-def _get_location_header(smth):
-    """
-    Python 2 and 3 helper function.
-    """
-    try:
-        # python3
-        return smth.getheader("Location") + "/"
-    except AttributeError:
-        # python2
-        return smth.info().getheader("Location") + "/"
-
-    return smth
 
 class ThinBkrHandlerError(teres.HandlerError):
     """
@@ -386,7 +365,7 @@ class ThinBkrHandler(teres.Handler):
 
             req = http_post(url, data)
 
-            self.last_result_url = _get_location_header(req)
+            self.last_result_url = req.getheader("Location") + "/"
 
             if record.flags.get(DEFAULT_LOG_DEST, False):
                 self.default_log_dest = self.last_result_url
@@ -521,15 +500,15 @@ class ThinBkrHandler(teres.Handler):
             try:
                 record_type, record = self.record_queue.get(timeout=0.1)
 
-                logger.debug("THREAD(%s) start _thread_emit_*", threading.currentThread().ident)
+                logger.debug("THREAD(%s) start _thread_emit_*", threading.current_thread().ident)
                 if record_type == _LOG:
-                    logger.debug("THREAD(%s) _thread_emit_log", threading.currentThread().ident)
+                    logger.debug("THREAD(%s) _thread_emit_log", threading.current_thread().ident)
                     self._thread_emit_log(record)
                     synced = False
                 elif record_type == _FILE:
-                    logger.debug("THREAD(%s) _thread_emit_file", threading.currentThread().ident)
+                    logger.debug("THREAD(%s) _thread_emit_file", threading.current_thread().ident)
                     self._thread_emit_file(record)
-                logger.debug("THREAD(%s) end _thread_emit_*", threading.currentThread().ident)
+                logger.debug("THREAD(%s) end _thread_emit_*", threading.current_thread().ident)
 
             except QueueEmpty:
                 pass
