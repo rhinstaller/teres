@@ -37,7 +37,7 @@ actual reporting.
 
 .. py:class:: Reporter()
 
-    This is the class that provides the API. It hase to be initialized with set
+    This is the class that provides the API. It has to be initialized with set
     of handlers in a similar manner as python logging interface. To get an
     instance of the :py:class:`Reporter` class use :py:meth:`get_reporter()`
     method.
@@ -89,7 +89,7 @@ actual reporting.
         Report a log file. The *logfile* argument can be a path to a log file
         stored on the filesystem or a file like object. In case of file like
         object is passed the read permissions are mandatory. The *logname*
-        arguments provides custom log name.
+        argument provides custom log name.
 
     .. py:method:: test_end(clean_end=True)
 
