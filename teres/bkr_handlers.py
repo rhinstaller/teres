@@ -68,6 +68,7 @@ SCORE = Flag('SCORE')  # mandatory parameter: score
 SUBTASK_LOG_FILE = Flag('SUBTASK_LOG_FILE')  # optional parameter: result url
 DEFAULT_LOG_DEST = Flag('DEFAULT_LOG_DEST')  # boolean
 QUIET_FILE = Flag('QUIET_FILE')  # boolean
+REUPLOAD = Flag('REUPLOAD')  # boolean
 
 # Define record types since we need to propagate information about the type from
 # the parent class.
@@ -135,10 +136,14 @@ def http_put(url, payload, **headers):
     """
     Function to simplify interaction with urllib.
     """
+    logger.debug('http_put(): url=%r' % url)
+    logger.debug('http_put(): len(payload)=%r, payload[0:20]=%r)'
+                 % (len(payload), payload[0:20]))
+    logger.debug('http_put(): headers=%r' % headers)
     opener = build_opener(HTTPHandler)
     req = Request(url, data=teres.make_bytes(payload))
     req.add_header('Content-Type', 'text/plain')
-    for header, value in headers:
+    for header, value in headers.items():
         req.add_header(header, value)
     req.get_method = lambda: 'PUT'
     for i in range(HTTP_RETRIES):
@@ -201,6 +206,85 @@ class ThinBkrHandlerError(teres.HandlerError):
     pass
 
 
+class _IncrementalUploader:
+    """
+    Uploader utility object that will keep track of previous uploads and
+    try to detect when a file has grown since last upload and upload just
+    the new bytes.
+
+    Note that this detection is very naiive.  For files that might change
+    in any other way than appending new bytes, you probably only want to
+    make sure to only use upload_whole().
+
+    The detection also does not respect file path; file identity is tracked
+    only in terms of URL.  (That is, uploading file to different URL's will
+    upload twice, but uploading different files to same URL will probably
+    break the detection.)
+    """
+
+    def __init__(self):
+        self._next_chunk_pos = {}
+
+    def upload_chunk(self, handle, url):
+        """
+        Upload increment (added bytes) from file-like *handle* a to URL *url*.
+
+        Based on previous uploads (either invoked by this method or upload_whole()),
+        read only new bytes and "remember" the upload.
+        """
+        if url not in self._next_chunk_pos:
+            # new file (0 size is ok)
+            self.upload_whole(handle, url)
+            return
+        range_from = self._next_chunk_pos[url]
+        payload, range_from, range_to = self._tell_read_seek(handle, range_from)
+        if not payload:
+            logger.info("_IncrementalUploader: nothing new to upload: 0 bytes for %s" % url)
+            return
+        logger.info("_IncrementalUploader: uploading file chunk: %d bytes to %s" % (len(payload), url))
+        headers = {'Content-Range': 'bytes %d-%d/*' % (range_from, range_to)}
+        http_put(url, payload, **headers)
+        self._next_chunk_pos[url] = range_to + 1
+
+    def upload_whole(self, handle, url):
+        """
+        Upload all bytes from file-like *handle* to URL *url*.
+
+        Keep record of uploaded bytes so that if file grows, subsequent calls
+        to upload_chunk() will upload only the newly added bytes.
+        """
+        payload, range_from, range_to = self._tell_read_seek(handle)
+        if url in self._next_chunk_pos:
+            logger.info("_IncrementalUploader: re-uploading file: %d bytes to %s"
+                        % (len(payload), url))
+        else:
+            logger.info("_IncrementalUploader: uploading new file: %d bytes to %s"
+                        % (len(payload), url))
+        http_put(url, payload)
+        self._next_chunk_pos[url] = range_to + 1
+
+    def _tell_read_seek(self, handle, range_from=0):
+        """
+        Read payload from file-like *handle* and return it including suggested
+        chunk upload range.
+
+        This method will seek inside the file but restore the handle cursor
+        afterwards.
+
+        Note that even though we restore the cursor,  this is not a thread-safe
+        operation as the tell-read-seek is a non-atomic sequence and another
+        thread reading from the same file in the meantime would likely get
+        corrupted data.  Also if the file is a stream (pipe or a stream device)
+        then the read itself is irreversibly altering external state.
+        """
+        cursor_backup = handle.tell()
+        handle.seek(range_from)
+        payload = handle.read()
+        handle.seek(cursor_backup)
+        range_to = range_from + len(payload) - 1
+        return payload, range_from, range_to
+
+
 class ThinBkrHandler(teres.Handler):
     """
     Simple handler for reporting results to beaker within one task. I should be
@@ -223,6 +307,10 @@ class ThinBkrHandler(teres.Handler):
         # This is a thread safe queue to pass logs and files to thread that
         # takes care of sending them to beaker.
         self.record_queue = Queue()
+
+        # Uploader for _thread_emit_file() to keep track of
+        # what was uploaded.
+        self._uploader = _IncrementalUploader()
 
         # Read beaker environment variables to be able to communicate with lab
         # controller.
@@ -422,27 +510,16 @@ class ThinBkrHandler(teres.Handler):
         if not record.flags.get(QUIET_FILE, False):
             self._emit_log(teres.ReportRecord(teres.FILE, msg))
 
-    def _thread_emit_file(self, record, offset=0):
+    def _thread_emit_file(self, record):
         """
         Send file record to beaker.
         """
         url = self._generate_url(record)
-
-        position = record.logfile.tell()
-        record.logfile.seek(offset)
-        payload = record.logfile.read()
-        record.logfile.seek(position)
-
-        logger.debug("ThinBkrHandler: calling _thread_emit_file with: %s",
-                     record.logname)
-
-        headers = {}
-        if offset:
-            length = len(payload)
-            headers['Content-Range'] = 'bytes %d-%d/%d' % (
-                offset, offset+length, length,
-            )
-        http_put(url, payload, **headers)
+        reuploading = record.flags.get(REUPLOAD, False)
+        if reuploading:
+            self._uploader.upload_whole(record.logfile, url)
+        else:
+            self._uploader.upload_chunk(record.logfile, url)
 
     def reset_log_dest(self):
         """
