@@ -237,7 +237,14 @@ class Reporter(object):
         self._lock = threading.RLock()
 
     def __del__(self):
-        logger.debug("Reporter: calling __del__")
+        try:
+            logger.debug("Reporter: calling __del__")
+        # It may happen that we get "NameError: name 'open' is not defined" even though
+        # the 'open' builtin function should still exist at this point.
+        # See https://stackoverflow.com/questions/64679139 and RTT-4820.
+        # "pass" is used as we can't log the error reasonably anyway
+        except NameError:
+            pass
         if not self.finished:
             self.test_end()
 
@@ -249,7 +256,11 @@ class Reporter(object):
         if self.finished:
             return self.overall_result
 
-        logger.info("Reporter: calling test_end")
+        # Catch "NameError" exception for the same reason as in __del__
+        try:
+            logger.info("Reporter: calling test_end")
+        except NameError:
+            pass
         if not clean_end:
             self.log_error("Test ended unexpectedly.")
 
